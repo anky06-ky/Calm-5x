@@ -65,7 +65,10 @@ export default function CustomCursor({ enabled }) {
       <div
         ref={ringRef}
         className={`custom-cursor-ring ${isHovered ? 'active' : ''}`}
-      />
+      >
+        <span className="cursor-orbit-spark" />
+        <span className="cursor-orbit-spark" />
+      </div>
     </>
   );
 }

@@ -10,6 +10,7 @@ import ImpactPricing from './components/ImpactPricing';
 import Footer from './components/Footer';
 import PresentationView from './components/PresentationView';
 import ScrollProgress from './components/ScrollProgress';
+import AmbientMotion from './components/AmbientMotion';
 
 const readPreference = (key, fallback) => {
   try {
@@ -60,6 +61,7 @@ export default function App() {
     <div className="calmx-app-root">
       {/* Interactive WebGL / Canvas particle background */}
       <CanvasBackground performanceMode={performanceMode} />
+      <AmbientMotion />
 
       {/* Futuristic neon custom cursor */}
       <CustomCursor enabled={cursorEnabled && supportsCustomCursor} />

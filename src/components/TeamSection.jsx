@@ -14,8 +14,12 @@ export default function TeamSection({ onSelectMember }) {
     const rect = card.getBoundingClientRect();
     const rotateX = ((event.clientY - rect.top) / rect.height - 0.5) * -8;
     const rotateY = ((event.clientX - rect.left) / rect.width - 0.5) * 8;
+    const pointerX = ((event.clientX - rect.left) / rect.width) * 100;
+    const pointerY = ((event.clientY - rect.top) / rect.height) * 100;
     card.style.setProperty('--rotate-x', `${rotateX}deg`);
     card.style.setProperty('--rotate-y', `${rotateY}deg`);
+    card.style.setProperty('--pointer-x', `${pointerX}%`);
+    card.style.setProperty('--pointer-y', `${pointerY}%`);
   };
 
   const resetTilt = (event) => {
@@ -85,22 +89,26 @@ export default function TeamSection({ onSelectMember }) {
           <div className="team-members-grid">
             {teamMembers.map((member, index) => (
               <Reveal key={member.id} className="team-card-reveal" delay={index * 90}>
-                <article
-                  className="member-card"
-                  style={{ '--member-accent': memberAccents[index] }}
-                  onPointerMove={handlePointerMove}
-                  onPointerLeave={resetTilt}
-                  onClick={() => onSelectMember(member)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      onSelectMember(member);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Xem câu chuyện của ${member.name}`}
+                <div
+                  className="member-card-float"
+                  style={{ '--float-delay': `${index * -0.9}s` }}
                 >
+                  <article
+                    className="member-card"
+                    style={{ '--member-accent': memberAccents[index] }}
+                    onPointerMove={handlePointerMove}
+                    onPointerLeave={resetTilt}
+                    onClick={() => onSelectMember(member)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        onSelectMember(member);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Xem câu chuyện của ${member.name}`}
+                  >
                   <div className="member-card-topline">
                     <span>CalmX / 0{index + 1}</span>
                     <ArrowUpRight size={16} />
@@ -133,7 +141,8 @@ export default function TeamSection({ onSelectMember }) {
                     </span>
                     <span>{member.stats.contribution} đóng góp</span>
                   </div>
-                </article>
+                  </article>
+                </div>
               </Reveal>
             ))}
           </div>

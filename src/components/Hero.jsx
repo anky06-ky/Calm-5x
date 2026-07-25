@@ -109,6 +109,13 @@ export default function Hero({ onSelectMember }) {
             ))}
           </div>
         </div>
+
+        <a className="hero-scroll-cue" href="#team" aria-label="Cuộn xuống khu vực đội ngũ">
+          <span className="hero-scroll-mouse">
+            <i />
+          </span>
+          <span>Cuộn để khám phá</span>
+        </a>
       </div>
     </section>
   );
