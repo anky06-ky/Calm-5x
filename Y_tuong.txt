@@ -1,0 +1,206 @@
+dựa vào dữ liệu trong  folder tạo 1 trang web giới thiệu thành viên và dự án  
+Trang chủ
+Hero section nổi bật, có animation nhẹ.
+Tên nhóm, slogan và mô tả ngắn.
+Nút khám phá thành viên và dự án.
+Hiệu ứng cuộn mượt, chữ hoặc hình ảnh xuất hiện theo scroll.
+Trang thành viên
+Ảnh đại diện từng thành viên.
+Họ tên, vai trò, kỹ năng và giới thiệu ngắn.
+Liên kết GitHub, LinkedIn, Facebook hoặc email.
+Khi rê chuột vào thẻ thành viên có hiệu ứng nghiêng 3D nhẹ.
+Nhấn vào thành viên để mở trang hoặc popup chi tiết.
+Trang dự án
+Danh sách dự án theo dạng card.
+Ảnh demo, tên dự án, mô tả và công nghệ sử dụng.
+Nút xem demo và xem mã nguồn.
+Có bộ lọc theo loại dự án như AI, Web, Mobile, Data.
+Cho phép nhấn ảnh để phóng to hoặc xem gallery.
+Hiệu ứng nên giữ
+Chuyển trang mượt.
+Scroll-triggered animation.
+Parallax nhẹ.
+Custom cursor trên desktop.
+Card 3D hoặc một mô hình 3D nhỏ ở trang chủ.
+Hover tinh tế cho nút, ảnh và menu.
+Dark mode và light mode.
+Responsive cho điện thoại, tablet và máy tính.
+Những phần chưa cần
+Tự thay đổi theo thời tiết.
+Xin quyền truy cập vị trí người dùng.
+Headless CMS nếu nội dung ít thay đổi.
+Edge Computing phức tạp.
+Không gian WebGL 3D cho toàn bộ website.
+Custom cursor quá cầu kỳ.
+Animation liên tục trên mọi thành phần.
+
+Cấu trúc hợp lý nhất:
+
+Trang chủ → Thành viên → Dự án → Chi tiết dự án → Liên hệ
+
+Về công nghệ, có thể dùng:
+
+React hoặc Next.js
+Tailwind CSS
+Framer Motion cho animation
+GSAP nếu muốn hiệu ứng cuộn điện ảnh hơn
+Three.js hoặc React Three Fiber cho một khu vực 3D nhỏ
+Swiper cho ảnh dự án
+
+
+1. Màn hình mở đầu
+
+Hiển thị:
+
+Tên nhóm.
+Slogan.
+Một vật thể 3D trung tâm như quả cầu, khối lập phương, logo nhóm hoặc màn hình máy tính.
+Background có ánh sáng, particle hoặc gradient chuyển động.
+Dòng chữ xuất hiện từng lớp theo chuyển động camera.
+
+Khi người dùng di chuột:
+
+Mô hình xoay nhẹ theo con trỏ.
+Ánh sáng thay đổi.
+Các hạt nền phản ứng theo chuột.
+Nút “Khám phá” có hiệu ứng hút con trỏ.
+2. Phần giới thiệu nhóm
+
+Khi cuộn xuống:
+
+Camera tiến gần vào mô hình.
+Mô hình tách thành nhiều phần.
+Mỗi phần đại diện cho một thành viên.
+Tên và vai trò xuất hiện theo từng nhịp cuộn.
+
+Đây sẽ là phần tạo cảm giác “đang xem phim”.
+
+3. Khu vực thành viên
+
+Mỗi thành viên có:
+
+Ảnh chân dung.
+Tên.
+Vai trò.
+Kỹ năng.
+Các dự án đã tham gia.
+GitHub, Facebook, LinkedIn hoặc email.
+
+Hiệu ứng:
+
+Card nghiêng theo chuột.
+Ảnh có chiều sâu 3D.
+Rê chuột vào thì background đổi ánh sáng.
+Nhấn vào card sẽ mở hồ sơ chi tiết bằng một transition toàn màn hình.
+
+Có thể thiết kế thành viên đứng trong một vòng tròn 3D, người dùng kéo để xoay và chọn từng người.
+
+4. Khu vực dự án
+
+Các dự án có thể trình bày như:
+
+Những hành tinh trong không gian.
+Các màn hình nổi.
+Một hành lang triển lãm.
+Các thẻ dự án nằm trong không gian 3D.
+Carousel 3D có thể kéo bằng chuột.
+
+Khi chọn dự án:
+
+Camera bay đến dự án đó.
+Ảnh dự án phóng lớn.
+Nội dung chi tiết dần xuất hiện.
+Có gallery, video demo, công nghệ sử dụng và liên kết GitHub.
+5. Trang chi tiết dự án
+
+Nên có:
+
+Hero lớn.
+Mô hình hoặc ảnh demo có thể xoay và phóng to.
+Mô tả vấn đề.
+Giải pháp.
+Công nghệ.
+Vai trò từng thành viên.
+Hình ảnh kết quả.
+Link GitHub.
+Link demo.
+
+Animation có thể mạnh ở phần mở đầu, nhưng phần đọc nội dung nên dịu hơn để người xem không bị mệt.
+
+6. Phần liên hệ
+
+Có thể kết thúc bằng:
+
+Một cánh cổng 3D.
+Một khối ánh sáng.
+Các icon mạng xã hội bay trong không gian.
+Form liên hệ xuất hiện khi camera tiến vào khu vực cuối.
+Những hiệu ứng nên dùng
+Scroll-driven camera movement.
+WebGL background.
+Particle system.
+3D model rotation.
+Magnetic cursor.
+Image zoom.
+Page transition.
+Text reveal.
+Parallax nhiều lớp.
+Hover distortion.
+Shader effect.
+Smooth scrolling.
+Loading intro animation.
+Cinematic scene transition.
+Công nghệ phù hợp
+
+Mình khuyên dùng:
+
+Next.js: cấu trúc website và chuyển trang.
+React Three Fiber: dựng 3D dễ hơn Three.js thuần.
+Three.js: xử lý WebGL.
+GSAP + ScrollTrigger: animation theo cuộn.
+Framer Motion: transition UI, modal, card.
+Lenis: cuộn trang mượt.
+Tailwind CSS: xây dựng giao diện nhanh.
+Drei: hỗ trợ camera, model, environment và controls.
+GLTF/GLB: định dạng mô hình 3D.
+Vercel: triển khai website.
+Tỷ lệ hợp lý
+
+Với mong muốn của bạn, mình sẽ chia:
+
+40% nội dung
+35% animation
+25% không gian 3D
+
+Không nên để 3D chiếm toàn bộ website. Phần đầu và phần dự án có thể rất mạnh, còn phần thông tin thành viên cần rõ ràng và dễ đọc.
+
+Những chức năng nên có
+Xem và lọc dự án.
+Xem hồ sơ thành viên.
+Phóng to gallery hình ảnh.
+Xem video demo.
+Chuyển dark/light mode.
+Chuyển ngôn ngữ Việt/Anh.
+Tìm kiếm dự án.
+Kéo xoay không gian 3D.
+Điều khiển bằng chuột và cảm ứng.
+Nút tắt âm thanh.
+Nút giảm hiệu ứng cho thiết bị yếu.
+Ý tưởng giao diện hoàn chỉnh
+
+Tên concept có thể là:
+
+Digital Orbit – Không gian số của nhóm
+kê
+Màn hình đầu có một lõi năng lượng 3D. Khi cuộn, lõi này tách ra thành các thành viên. Cuộn tiếp, mỗi thành viên kết nối với các dự án bằng những đường ánh sáng. Người dùng chọn một dự án thì camera bay vào dự án đó để xem chi tiết.
+
+Concept này vừa có:
+
+Thành viên.
+Dự án.
+Storytelling.
+WebGL.
+Animation mạnh. 
+Tương tác chuột.
+Cảm giác điện ảnh.
+gọp  cả 2 ý tưởng trong đây lại vào làm nha 
