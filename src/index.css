@@ -119,6 +119,49 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: var(--shadow-neon);
 }
 
+.team-members-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+
+.team-members-grid > .glass-card {
+  min-width: 0;
+}
+
+.team-member-avatar {
+  height: 240px;
+}
+
+@media (max-width: 1199px) {
+  .team-members-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+  }
+}
+
+@media (max-width: 767px) {
+  .team-members-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .team-member-avatar {
+    height: 220px;
+  }
+}
+
+@media (max-width: 520px) {
+  .team-members-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .team-member-avatar {
+    height: 300px;
+  }
+}
+
 /* Buttons */
 .btn-primary {
   display: inline-flex;

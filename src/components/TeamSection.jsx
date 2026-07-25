@@ -91,13 +91,7 @@ export default function TeamSection({ onSelectMember }) {
 
         {/* Members 3D Grid */}
         {filter !== 'advisors' && (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '30px',
-            }}
-          >
+          <div className="team-members-grid">
             {filteredMembers.map((m) => (
               <div
                 key={m.id}
@@ -127,7 +121,7 @@ export default function TeamSection({ onSelectMember }) {
               >
                 <div>
                   {/* Avatar */}
-                  <div className="avatar-frame-3d" style={{ height: '280px', marginBottom: '20px' }}>
+                  <div className="avatar-frame-3d team-member-avatar" style={{ marginBottom: '20px' }}>
                     <img
                       src={m.image}
                       alt={m.name}
