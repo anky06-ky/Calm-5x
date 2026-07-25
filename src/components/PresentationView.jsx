@@ -7,7 +7,7 @@ import AppDemo from './AppDemo';
 
 export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(2);
   const [isAutoplay, setIsAutoplay] = useState(false);
   const autoplayTimerRef = useRef(null);
 
@@ -25,24 +25,25 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
   const slide = slides[currentSlide];
 
   const handleNext = () => {
-    if (currentStep < slide.maxSteps - 1) {
-      setCurrentStep((prev) => prev + 1);
-    } else if (currentSlide < totalSlides - 1) {
-      setCurrentSlide((prev) => prev + 1);
-      setCurrentStep(0);
+    if (currentSlide < totalSlides - 1) {
+      const nextSlide = currentSlide + 1;
+      setCurrentSlide(nextSlide);
+      setCurrentStep(slides[nextSlide].maxSteps - 1);
     } else {
       setCurrentSlide(0);
-      setCurrentStep(0);
+      setCurrentStep(slides[0].maxSteps - 1);
     }
   };
 
   const handlePrev = () => {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
-    } else if (currentSlide > 0) {
+    if (currentSlide > 0) {
       const prevSlideIndex = currentSlide - 1;
       setCurrentSlide(prevSlideIndex);
       setCurrentStep(slides[prevSlideIndex].maxSteps - 1);
+    } else {
+      const lastSlideIndex = totalSlides - 1;
+      setCurrentSlide(lastSlideIndex);
+      setCurrentStep(slides[lastSlideIndex].maxSteps - 1);
     }
   };
 
@@ -61,7 +62,7 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'Space' || e.key === 'PageDown') {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.code === 'Space' || e.key === 'PageDown') {
         e.preventDefault();
         handleNext();
       } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
@@ -75,7 +76,7 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
 
   const jumpToSlide = (index) => {
     setCurrentSlide(index);
-    setCurrentStep(0);
+    setCurrentStep(slides[index].maxSteps - 1);
   };
 
   return (
@@ -84,8 +85,8 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
       <div className="pres-header-bar">
         <div className="pres-slide-badge">
           🎬 <span className="pres-title-text">{slide.title}</span>
-          <span className="pres-step-pill">Lớp {currentStep + 1} / {slide.maxSteps}</span>
-          <span className="pres-kbd-hint navbar-hide-mobile">⌨ Mũi tên ◀ ▶ / Space để hiện lớp</span>
+          <span className="pres-step-pill">Slide {currentSlide + 1} / {totalSlides}</span>
+          <span className="pres-kbd-hint navbar-hide-mobile">⌨ Mũi tên ◀ ▶ / Space để chuyển slide</span>
         </div>
 
         <div className="pres-header-actions">
@@ -399,7 +400,7 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
         </div>
 
         <button onClick={handleNext} className="pres-nav-btn highlight">
-          <span>{currentStep < slide.maxSteps - 1 ? `Hiện Lớp (${currentStep + 2}/${slide.maxSteps})` : 'Slide Sau ▶'}</span>
+          <span>{currentSlide === totalSlides - 1 ? 'Về Slide Đầu' : 'Slide Sau'}</span>
           <ChevronRight size={18} />
         </button>
       </div>
