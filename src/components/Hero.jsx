@@ -8,7 +8,7 @@ const shortRoles = [
   'Full-stack',
   'UI/UX',
   'AI & Data',
-  'Community',
+  'AI Engineer',
 ];
 
 export default function Hero({ onSelectMember }) {

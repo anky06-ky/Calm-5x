@@ -90,12 +90,12 @@ export const teamMembers = [
   {
     id: 'ky-tran',
     name: 'Trần An Kỳ',
-    role: 'Marketing & Community Operations',
-    tagline: 'Phát triển cộng đồng ẩn danh & Truyền thông dự án',
+    role: 'AI Engineer & Machine Learning Developer',
+    tagline: 'Phát triển AI Caly & Tự động hóa trải nghiệm thông minh',
     image: '/members/Trần_An_Kỳ.jpg',
     isPlaceholder: false,
-    bio: 'Xây dựng chiến dịch truyền thông tích cực, quản trị Không gian Cộng đồng Ẩn danh an toàn và phát triển đối tác mạng lưới chuyên gia CalmX Care.',
-    skills: ['Community Growth', 'Digital Marketing', 'Public Relations', 'Event Hosting'],
+    bio: 'Nghiên cứu và triển khai các tính năng trí tuệ nhân tạo cho CalmX, xây dựng luồng xử lý ngôn ngữ tự nhiên, tối ưu phản hồi của AI Caly và kết nối mô hình AI vào trải nghiệm sản phẩm.',
+    skills: ['AI Engineering', 'Machine Learning', 'Prompt Engineering', 'Python & NLP'],
     stats: {
       contribution: '97%',
       projects: '14+',
@@ -107,7 +107,7 @@ export const teamMembers = [
       github: 'https://github.com',
       email: 'ky.tran@calmx.app'
     },
-    quote: 'Tạo dựng môi trường chia sẻ tích cực, nơi không ai bị bỏ lại phía sau.'
+    quote: 'AI không thay thế sự đồng cảm; AI giúp sự đồng cảm đến đúng người, đúng lúc.'
   }
 ];
 

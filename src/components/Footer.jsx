@@ -112,7 +112,7 @@ export default function Footer() {
               <div>• Huỳnh Quang Sang (Developer)</div>
               <div>• Đặng Khánh Linh (UI/UX)</div>
               <div>• Nguyễn Phạm Trọng Khang (AI)</div>
-              <div>• Trần An Kỳ (Marketing)</div>
+              <div>• Trần An Kỳ (AI Engineer)</div>
             </div>
           </div>
 

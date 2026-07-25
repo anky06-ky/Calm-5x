@@ -56,7 +56,7 @@ export default function TeamSection({ onSelectMember }) {
             </div>
           </div>
           <div className="team-role-map" aria-label="Năm lĩnh vực chuyên môn">
-            {['Chiến lược', 'Công nghệ', 'Trải nghiệm', 'AI & Dữ liệu', 'Cộng đồng'].map(
+            {['Chiến lược', 'Công nghệ', 'Trải nghiệm', 'AI & Dữ liệu', 'AI Engineering'].map(
               (role, index) => (
                 <span key={role} style={{ '--role-color': memberAccents[index] }}>
                   {role}
