@@ -12,6 +12,8 @@ const shortRoles = [
 ];
 
 export default function Hero({ onSelectMember }) {
+  const marqueeMembers = [...teamMembers, ...teamMembers];
+
   return (
     <section id="hero" className="team-first-hero">
       <div className="hero-aurora hero-aurora-one" aria-hidden="true" />
@@ -45,6 +47,12 @@ export default function Hero({ onSelectMember }) {
         </Reveal>
 
         <Reveal className="hero-member-stage" delay={120}>
+          <div className="stage-motion-lines" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+
           <div className="hero-member-stage-head">
             <div>
               <span className="hero-member-kicker">The minds behind CalmX</span>
@@ -88,6 +96,19 @@ export default function Hero({ onSelectMember }) {
             Chạm vào từng thành viên để xem câu chuyện, kỹ năng và dấu ấn cá nhân.
           </div>
         </Reveal>
+
+        <div className="team-marquee" aria-hidden="true">
+          <div className="team-marquee-track">
+            {marqueeMembers.map((member, index) => (
+              <div className="team-marquee-item" key={`${member.id}-${index}`}>
+                <span>0{(index % teamMembers.length) + 1}</span>
+                <strong>{member.name}</strong>
+                <i>{shortRoles[index % shortRoles.length]}</i>
+                <b>✦</b>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
