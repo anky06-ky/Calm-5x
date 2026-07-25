@@ -154,6 +154,7 @@ export default function AppDemo() {
 
         {/* Prototype Tabs */}
         <div
+          className="app-demo-tabs"
           style={{
             display: 'flex',
             justifyContent: 'center',
@@ -185,6 +186,7 @@ export default function AppDemo() {
         {/* Toast Notification */}
         {toastMessage && (
           <div
+            className="app-demo-toast"
             style={{
               position: 'fixed',
               bottom: '30px',
@@ -208,7 +210,7 @@ export default function AppDemo() {
 
         {/* App Frame Shell */}
         <div
-          className="glass-card"
+          className="glass-card app-demo-frame"
           style={{
             maxWidth: '920px',
             margin: '0 auto',
@@ -232,9 +234,10 @@ export default function AppDemo() {
                 Hãy chọn 1 biểu tượng cảm xúc gần nhất với bạn ngay lúc này. CalmX sẽ ghi nhận và điều chỉnh gợi ý phù hợp.
               </p>
 
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', marginBottom: '40px' }}>
+              <div className="app-emotion-grid" style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', marginBottom: '40px' }}>
                 {emotions.map((emo) => (
                   <button
+                    className="app-emotion-button"
                     key={emo.id}
                     onClick={() => handleCheckin(emo)}
                     style={{
@@ -331,7 +334,7 @@ export default function AppDemo() {
               </div>
 
               {/* Input Form */}
-              <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} style={{ display: 'flex', gap: '10px' }}>
+              <form className="app-demo-inline-form" onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} style={{ display: 'flex', gap: '10px' }}>
                 <input
                   type="text"
                   value={inputMessage}
@@ -490,7 +493,7 @@ export default function AppDemo() {
               </div>
 
               {/* Add Mock Post Form */}
-              <form onSubmit={handleAddPost} style={{ marginBottom: '24px', display: 'flex', gap: '10px' }}>
+              <form className="app-demo-inline-form" onSubmit={handleAddPost} style={{ marginBottom: '24px', display: 'flex', gap: '10px' }}>
                 <input
                   type="text"
                   value={newPostContent}
@@ -558,7 +561,7 @@ export default function AppDemo() {
                 </p>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
+              <div className="app-care-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
                 {[
                   { name: 'Th.S Lê Minh Anh', spec: 'Tâm lý Lâm sàng', exp: '8 năm kinh nghiệm', image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80' },
                   { name: 'Th.S Trần Hoàng Nam', spec: 'Tham vấn Tâm lý Giới trẻ', exp: '6 năm kinh nghiệm', image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80' },

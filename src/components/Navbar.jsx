@@ -329,7 +329,7 @@ export default function Navbar({
           font-size: 0.85rem; color: #d1d5db;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1240px) {
           .navbar-desktop-nav { display: none !important; }
           .navbar-hamburger { display: flex !important; }
           .navbar-hide-mobile { display: none !important; }

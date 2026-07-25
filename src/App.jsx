@@ -10,29 +10,49 @@ import ImpactPricing from './components/ImpactPricing';
 import Footer from './components/Footer';
 import PresentationView from './components/PresentationView';
 
+const readPreference = (key, fallback) => {
+  try {
+    return localStorage.getItem(key) ?? fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const writePreference = (key, value) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Preferences are optional when storage is unavailable (for example, private browsing).
+  }
+};
+
 export default function App() {
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const supportsCustomCursor = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   const [performanceMode, setPerformanceMode] = useState(
-    () => localStorage.getItem('calmx_performance_mode') === 'true' || prefersReducedMotion
+    () => readPreference('calmx_performance_mode', 'false') === 'true' || prefersReducedMotion
   );
   const [cursorEnabled, setCursorEnabled] = useState(
-    () => localStorage.getItem('calmx_cursor_enabled') !== 'false' && !prefersReducedMotion
+    () =>
+      readPreference('calmx_cursor_enabled', 'true') !== 'false' &&
+      !prefersReducedMotion &&
+      supportsCustomCursor
   );
   const [selectedMember, setSelectedMember] = useState(null);
   const [viewMode, setViewMode] = useState(
-    () => localStorage.getItem('calmx_view_mode') || 'presentation'
+    () => readPreference('calmx_view_mode', 'scroll')
   );
 
   useEffect(() => {
-    localStorage.setItem('calmx_performance_mode', String(performanceMode));
+    writePreference('calmx_performance_mode', String(performanceMode));
   }, [performanceMode]);
 
   useEffect(() => {
-    localStorage.setItem('calmx_cursor_enabled', String(cursorEnabled));
+    writePreference('calmx_cursor_enabled', String(cursorEnabled));
   }, [cursorEnabled]);
 
   useEffect(() => {
-    localStorage.setItem('calmx_view_mode', viewMode);
+    writePreference('calmx_view_mode', viewMode);
   }, [viewMode]);
 
   return (
@@ -41,7 +61,7 @@ export default function App() {
       <CanvasBackground performanceMode={performanceMode} />
 
       {/* Futuristic neon custom cursor */}
-      <CustomCursor enabled={cursorEnabled} />
+      <CustomCursor enabled={cursorEnabled && supportsCustomCursor} />
 
       {/* Main Navbar with ViewMode switcher */}
       <Navbar
@@ -62,7 +82,7 @@ export default function App() {
       ) : (
         /* VIEW MODE 2: CONTINUOUS SCROLL MODE (Cuộn trang truyền thống) */
         <>
-          <Hero />
+          <Hero onSelectMember={setSelectedMember} />
           <TeamSection onSelectMember={(member) => setSelectedMember(member)} />
           <AppDemo />
           <ImpactPricing />
@@ -74,6 +94,7 @@ export default function App() {
       <TeamModal
         member={selectedMember}
         onClose={() => setSelectedMember(null)}
+        onSelectMember={setSelectedMember}
       />
     </div>
   );

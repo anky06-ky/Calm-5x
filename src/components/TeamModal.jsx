@@ -1,9 +1,28 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { X, Facebook, Linkedin, Github, Mail, Info, Sparkles, Upload, Check } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Facebook,
+  Github,
+  Linkedin,
+  Mail,
+  Quote,
+  Sparkles,
+  X,
+} from 'lucide-react';
+import { teamMembers } from '../data/membersData';
 
-export default function TeamModal({ member, onClose }) {
-  const [customAvatar, setCustomAvatar] = useState(null);
+export default function TeamModal({ member, onClose, onSelectMember }) {
   const closeButtonRef = useRef(null);
+  const memberIndex = member
+    ? teamMembers.findIndex((item) => item.id === member.id)
+    : -1;
+
+  const navigate = (direction) => {
+    if (memberIndex < 0) return;
+    const nextIndex = (memberIndex + direction + teamMembers.length) % teamMembers.length;
+    onSelectMember(teamMembers[nextIndex]);
+  };
 
   useEffect(() => {
     if (!member) return undefined;
@@ -11,9 +30,13 @@ export default function TeamModal({ member, onClose }) {
     const previouslyFocused = document.activeElement;
     document.body.style.overflow = 'hidden';
     closeButtonRef.current?.focus();
+
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') onClose();
+      if (event.key === 'ArrowLeft') navigate(-1);
+      if (event.key === 'ArrowRight') navigate(1);
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
@@ -22,187 +45,107 @@ export default function TeamModal({ member, onClose }) {
     };
   }, [member, onClose]);
 
-  useEffect(() => () => {
-    if (customAvatar) URL.revokeObjectURL(customAvatar);
-  }, [customAvatar]);
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setCustomAvatar(imageUrl);
-    }
-  };
-
   if (!member) return null;
-
-  const displayedImage = customAvatar || member.image;
 
   return (
     <div className="modal-overlay" onClick={onClose} role="presentation">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '32px' }} role="dialog" aria-modal="true" aria-labelledby="member-modal-title">
-        {/* Close Button */}
+      <article
+        className="modal-content member-modal"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="member-modal-title"
+      >
         <button
           ref={closeButtonRef}
+          type="button"
           onClick={onClose}
-          aria-label="Đóng thông tin thành viên"
-          style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            background: 'rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            color: '#fff',
-            borderRadius: '50%',
-            width: '38px',
-            height: '38px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.2s ease',
-          }}
+          className="member-modal-close"
+          aria-label="Đóng hồ sơ thành viên"
         >
           <X size={20} />
         </button>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px', alignItems: 'center' }}>
-          {/* Avatar frame */}
-          <div>
-            <div className="avatar-frame-3d" style={{ height: '360px' }}>
-              <img
-                src={displayedImage}
-                alt={member.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                onError={(e) => {
-                  e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80';
-                }}
-              />
-              {member.isPlaceholder && !customAvatar && (
-                <div className="placeholder-badge">
-                  Avatar 3D (Chờ ảnh thật)
-                </div>
-              )}
-              {customAvatar && (
-                <div className="placeholder-badge" style={{ background: 'rgba(74, 222, 128, 0.9)', color: '#000' }}>
-                  <Check size={12} inline="true" /> Ảnh Thật Đã Thử
-                </div>
-              )}
-            </div>
-
-            {/* Interactive Live Upload Test for Remaining Members */}
-            <div
-              style={{
-                marginTop: '16px',
-                padding: '14px',
-                borderRadius: '12px',
-                background: 'rgba(6, 182, 212, 0.12)',
-                border: '1px dashed rgba(6, 182, 212, 0.4)',
-                fontSize: '0.82rem',
-                color: '#38bdf8',
-                lineHeight: '1.4',
-              }}
-            >
-              <div style={{ fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                <Info size={14} /> Thêm / Thử Ảnh Thật Cho Thành Viên:
-              </div>
-              <p style={{ color: '#d1d5db', marginBottom: '8px' }}>
-                Chép file <code>{member.name.replace(/ /g, '_')}.png</code> (hoặc <code>.jpg</code>) vào thư mục <code>public/members/</code>.
-              </p>
-
-              <label className="btn-secondary" style={{ display: 'inline-flex', padding: '6px 12px', fontSize: '0.78rem', cursor: 'pointer' }}>
-                <Upload size={14} /> <span>Xem Trước File Ảnh Từ Máy</span>
-                <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
-              </label>
+        <div className="member-modal-grid">
+          <div className="member-modal-media">
+            <img src={member.image} alt={`Ảnh chân dung ${member.name}`} />
+            <div className="member-modal-index">
+              <span>Thành viên</span>
+              <strong>0{memberIndex + 1} / 05</strong>
             </div>
           </div>
 
-          {/* Details */}
-          <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#c084fc', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase', marginBottom: '8px' }}>
+          <div className="member-modal-details">
+            <div className="member-modal-role">
               <Sparkles size={14} /> {member.role}
             </div>
-            <h2 id="member-modal-title" style={{ fontSize: '2.2rem', fontWeight: '800', marginBottom: '8px' }}>
-              {member.name}
-            </h2>
-            <p style={{ color: '#06b6d4', fontWeight: '600', marginBottom: '16px' }}>
-              {member.tagline}
-            </p>
+            <h2 id="member-modal-title">{member.name}</h2>
+            <p className="member-modal-tagline">{member.tagline}</p>
+            <p className="member-modal-bio">{member.bio}</p>
 
-            <p style={{ color: '#9ca3af', lineHeight: '1.6', marginBottom: '24px', fontSize: '0.98rem' }}>
-              {member.bio}
-            </p>
-
-            {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.04)', padding: '12px', borderRadius: '12px', textAlign: 'center' }}>
-                <div style={{ fontWeight: '800', color: '#c084fc', fontSize: '1.2rem' }}>{member.stats.contribution}</div>
-                <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>Đóng Góp</div>
+            <div className="member-modal-stats">
+              <div>
+                <strong>{member.stats.contribution}</strong>
+                <span>Đóng góp</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.04)', padding: '12px', borderRadius: '12px', textAlign: 'center' }}>
-                <div style={{ fontWeight: '800', color: '#38bdf8', fontSize: '1.2rem' }}>{member.stats.projects}</div>
-                <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>Dự Án</div>
+              <div>
+                <strong>{member.stats.projects}</strong>
+                <span>Dự án</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.04)', padding: '12px', borderRadius: '12px', textAlign: 'center' }}>
-                <div style={{ fontWeight: '800', color: '#f43f5e', fontSize: '1.2rem' }}>{member.stats.experience}</div>
-                <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>Kinh Nghiệm</div>
+              <div>
+                <strong>{member.stats.experience}</strong>
+                <span>Kinh nghiệm</span>
               </div>
             </div>
 
-            {/* Skills */}
-            <div style={{ marginBottom: '24px' }}>
-              <div style={{ fontSize: '0.88rem', fontWeight: '700', marginBottom: '10px', color: '#d1d5db' }}>Kỹ Năng Nổi Bật</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {member.skills.map((skill, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      background: 'rgba(168, 85, 247, 0.15)',
-                      border: '1px solid rgba(192, 132, 252, 0.3)',
-                      color: '#e9d5ff',
-                      fontSize: '0.8rem',
-                      padding: '4px 12px',
-                      borderRadius: '999px',
-                    }}
-                  >
-                    {skill}
-                  </span>
+            <div className="member-modal-skills">
+              <span className="member-modal-label">Năng lực nổi bật</span>
+              <div>
+                {member.skills.map((skill) => (
+                  <span key={skill}>{skill}</span>
                 ))}
               </div>
             </div>
 
-            {/* Quote */}
-            <div
-              style={{
-                fontStyle: 'italic',
-                color: '#9ca3af',
-                borderLeft: '3px solid #a855f7',
-                paddingLeft: '12px',
-                marginBottom: '24px',
-                fontSize: '0.9rem',
-              }}
-            >
-              "{member.quote}"
-            </div>
+            <blockquote className="member-modal-quote">
+              <Quote size={18} />
+              <p>{member.quote}</p>
+            </blockquote>
 
-            {/* Social Links */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <a href={member.socials.facebook} target="_blank" rel="noreferrer" className="btn-secondary" style={{ padding: '10px' }} title="Facebook">
-                <Facebook size={18} />
-              </a>
-              <a href={member.socials.linkedin} target="_blank" rel="noreferrer" className="btn-secondary" style={{ padding: '10px' }} title="LinkedIn">
-                <Linkedin size={18} />
-              </a>
-              <a href={member.socials.github} target="_blank" rel="noreferrer" className="btn-secondary" style={{ padding: '10px' }} title="GitHub">
-                <Github size={18} />
-              </a>
-              <a href={`mailto:${member.socials.email}`} className="btn-secondary" style={{ padding: '10px' }} title="Email">
-                <Mail size={18} />
-              </a>
+            <div className="member-modal-actions">
+              <div className="member-modal-socials" aria-label="Liên kết thành viên">
+                {member.socials.facebook !== 'https://facebook.com' && (
+                  <a href={member.socials.facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
+                    <Facebook size={18} />
+                  </a>
+                )}
+                {member.socials.linkedin !== 'https://linkedin.com' && (
+                  <a href={member.socials.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn">
+                    <Linkedin size={18} />
+                  </a>
+                )}
+                {member.socials.github !== 'https://github.com' && (
+                  <a href={member.socials.github} target="_blank" rel="noreferrer" aria-label="GitHub">
+                    <Github size={18} />
+                  </a>
+                )}
+                <a href={`mailto:${member.socials.email}`} aria-label="Email">
+                  <Mail size={18} />
+                </a>
+              </div>
+
+              <div className="member-modal-navigation">
+                <button type="button" onClick={() => navigate(-1)} aria-label="Thành viên trước">
+                  <ChevronLeft size={18} />
+                </button>
+                <button type="button" onClick={() => navigate(1)} aria-label="Thành viên tiếp theo">
+                  <ChevronRight size={18} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </article>
     </div>
   );
 }

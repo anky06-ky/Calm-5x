@@ -2,19 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   ChevronRight, ChevronLeft, Play, Pause, Sparkles, Send, GraduationCap, Briefcase, Building
 } from 'lucide-react';
-import { teamMembers, advisors, projectMilestones } from '../data/membersData';
+import { teamMembers, projectMilestones } from '../data/membersData';
 import AppDemo from './AppDemo';
 
 export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentStep, setCurrentStep] = useState(2);
   const [isAutoplay, setIsAutoplay] = useState(false);
+  const [isPageVisible, setIsPageVisible] = useState(() => !document.hidden);
   const autoplayTimerRef = useRef(null);
 
   // Slides configuration with Slide 2 prioritized for 5 Team Members!
   const slides = [
     { id: 'intro', title: '1. Khởi Đầu & Logo Core', maxSteps: 3 },
-    { id: 'team', title: '2. 5 Thành Viên Siêu Ngầu', maxSteps: 3 },
+    { id: 'team', title: '2. 5 Thành Viên CalmX', maxSteps: 3 },
     { id: 'mission', title: '3. Sứ Mệnh & 5 Bước', maxSteps: 2 },
     { id: 'demo', title: '4. Prototype App Demo', maxSteps: 1 },
     { id: 'impact', title: '5. Tác Động & Bảng Giá', maxSteps: 2 },
@@ -48,7 +49,7 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
   };
 
   useEffect(() => {
-    if (isAutoplay) {
+    if (isAutoplay && isPageVisible) {
       autoplayTimerRef.current = setInterval(() => {
         handleNext();
       }, 4000);
@@ -58,10 +59,22 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
     return () => {
       if (autoplayTimerRef.current) clearInterval(autoplayTimerRef.current);
     };
-  }, [isAutoplay, currentSlide, currentStep]);
+  }, [isAutoplay, isPageVisible, currentSlide, currentStep]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => setIsPageVisible(!document.hidden);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      const target = e.target;
+      const isTyping =
+        target instanceof HTMLElement &&
+        (target.matches('input, textarea, select, button, a') || target.isContentEditable);
+      if (isTyping || document.querySelector('[role="dialog"]')) return;
+
       if (e.key === 'ArrowRight' || e.key === ' ' || e.code === 'Space' || e.key === 'PageDown') {
         e.preventDefault();
         handleNext();
@@ -94,6 +107,7 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
             onClick={() => setIsAutoplay(!isAutoplay)}
             className={`pres-btn ${isAutoplay ? 'active-purple' : ''}`}
             title={isAutoplay ? 'Tạm dừng tự động' : 'Tự động phát như video'}
+            aria-pressed={isAutoplay}
           >
             {isAutoplay ? <Pause size={14} /> : <Play size={14} />}
             <span>{isAutoplay ? 'Tạm Dừng Video' : 'Phát Tự Động'}</span>
@@ -106,7 +120,7 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
       </div>
 
       {/* Main Slide Stage Area */}
-      <div className="pres-stage">
+      <div className="pres-stage" role="region" aria-live="polite" aria-label={`Slide ${currentSlide + 1}: ${slide.title}`}>
         {/* SLIDE 1: INTRO & LOGO CORE */}
         {currentSlide === 0 && (
           <div className="pres-slide-content">
@@ -144,7 +158,7 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
                 <div className="hero-stats-grid" style={{ maxWidth: '780px' }}>
                   <div className="glass-card hero-stat-card">
                     <div className="hero-stat-value" style={{ color: '#c084fc' }}>05</div>
-                    <div className="hero-stat-label">Thành Viên Siêu Ngầu</div>
+                    <div className="hero-stat-label">Thành Viên Nòng Cốt</div>
                   </div>
                   <div className="glass-card hero-stat-card">
                     <div className="hero-stat-value" style={{ color: '#38bdf8' }}>06</div>
@@ -173,7 +187,7 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
                   Team Khát Vọng (CalmX)
                 </div>
                 <h2 style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: '800', marginBottom: '16px' }}>
-                  Đội Nữ 5 Thành Viên <span className="cyber-text">Siêu Ngầu</span>
+                  5 Thành Viên <span className="cyber-text">Một Quỹ Đạo CalmX</span>
                 </h2>
               </div>
             )}
@@ -181,52 +195,20 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
             {currentStep >= 1 && (
               <div className="pres-layer-item fade-in-up">
                 <div className="pres-team-grid">
-                  {teamMembers.slice(0, 3).map((m) => (
+                  {teamMembers.map((m, index) => (
                     <div key={m.id} className="glass-card interactive pres-team-card" onClick={() => onSelectMember(m)} onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         onSelectMember(m);
                       }
                     }} role="button" tabIndex={0} aria-label={`Xem thông tin ${m.name}`}>
-                      <div className="avatar-frame-3d" style={{ height: '150px', marginBottom: '10px' }}>
-                        <img src={m.image} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div className="avatar-frame-3d pres-team-avatar">
+                        <img src={m.image} alt={m.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </div>
-                      <div style={{ color: '#c084fc', fontSize: '0.72rem', fontWeight: '700' }}>{m.role}</div>
+                      <div className="pres-team-index">0{index + 1}</div>
+                      <div style={{ color: '#c084fc', fontSize: '0.64rem', fontWeight: '700', textTransform: 'uppercase' }}>{m.role}</div>
                       <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#fff', margin: '2px 0' }}>{m.name}</h3>
-                      <p style={{ color: '#9ca3af', fontSize: '0.75rem' }}>{m.tagline}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {currentStep >= 2 && (
-              <div className="pres-layer-item fade-in-up" style={{ marginTop: '16px' }}>
-                <div style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: '700', marginBottom: '8px' }}>
-                  🚀 Thành Viên Phát Triển Hệ Thống & Ban Cố Vấn Dự Án
-                </div>
-
-                <div className="pres-team-grid-bottom">
-                  {teamMembers.slice(3, 5).map((m) => (
-                    <div key={m.id} className="glass-card interactive pres-team-card" onClick={() => onSelectMember(m)} onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        onSelectMember(m);
-                      }
-                    }} role="button" tabIndex={0} aria-label={`Xem thông tin ${m.name}`}>
-                      <div className="avatar-frame-3d" style={{ height: '110px', marginBottom: '6px' }}>
-                        <img src={m.image} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      </div>
-                      <div style={{ color: '#06b6d4', fontSize: '0.7rem', fontWeight: '700' }}>{m.role}</div>
-                      <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#fff' }}>{m.name}</h3>
-                    </div>
-                  ))}
-
-                  {advisors.map((adv, idx) => (
-                    <div key={idx} className="glass-card pres-team-card" style={{ borderLeft: '3px solid #a855f7', padding: '10px' }}>
-                      <div style={{ color: '#a855f7', fontSize: '0.7rem', fontWeight: '700' }}>Cố Vấn Dự Án</div>
-                      <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#fff', margin: '2px 0' }}>{adv.name}</h4>
-                      <p style={{ color: '#9ca3af', fontSize: '0.72rem' }}>{adv.role}</p>
+                      <p style={{ color: '#9ca3af', fontSize: '0.7rem' }}>{m.tagline}</p>
                     </div>
                   ))}
                 </div>
@@ -381,7 +363,7 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
 
       {/* Bottom Floating Control Bar */}
       <div className="pres-footer">
-        <button onClick={handlePrev} className="pres-nav-btn">
+        <button onClick={handlePrev} className="pres-nav-btn" aria-label="Slide trước">
           <ChevronLeft size={18} />
           <span>Trước</span>
         </button>
@@ -393,13 +375,19 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
               onClick={() => jumpToSlide(idx)}
               className={`pres-dot ${currentSlide === idx ? 'active' : ''}`}
               title={s.title}
+              aria-label={`Đi tới slide ${idx + 1}: ${s.title}`}
+              aria-current={currentSlide === idx ? 'true' : undefined}
             >
               <span className="pres-dot-number">{idx + 1}</span>
             </button>
           ))}
         </div>
 
-        <button onClick={handleNext} className="pres-nav-btn highlight">
+        <button
+          onClick={handleNext}
+          className="pres-nav-btn highlight"
+          aria-label={currentSlide === totalSlides - 1 ? 'Về slide đầu' : 'Slide sau'}
+        >
           <span>{currentSlide === totalSlides - 1 ? 'Về Slide Đầu' : 'Slide Sau'}</span>
           <ChevronRight size={18} />
         </button>
@@ -409,6 +397,7 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
         /* ===== Presentation View Layout ===== */
         .presentation-container {
           min-height: 100vh;
+          min-height: 100dvh;
           padding-top: 120px;
           padding-bottom: 90px;
           display: flex;
@@ -500,7 +489,7 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
         /* ===== Stage Area ===== */
         .pres-stage {
           width: 100%;
-          max-width: 1100px;
+          max-width: 1280px;
           margin: 0 auto;
           padding: 10px 20px;
           display: flex;
@@ -540,21 +529,34 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
 
         .pres-team-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 14px;
-          max-width: 800px;
-          margin: 0 auto;
-        }
-        .pres-team-grid-bottom {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(5, minmax(0, 1fr));
           gap: 12px;
-          max-width: 850px;
+          max-width: 1160px;
           margin: 0 auto;
         }
         .pres-team-card {
+          position: relative;
           padding: 12px;
           text-align: center;
+          cursor: pointer;
+          min-width: 0;
+        }
+        .pres-team-avatar {
+          height: clamp(150px, 20vh, 220px);
+          margin-bottom: 10px;
+        }
+        .pres-team-index {
+          position: absolute;
+          top: 18px;
+          right: 18px;
+          z-index: 2;
+          color: #fff;
+          background: rgba(7, 5, 16, 0.66);
+          border: 1px solid rgba(255,255,255,0.16);
+          padding: 3px 6px;
+          border-radius: 999px;
+          font-size: 0.62rem;
+          font-weight: 800;
         }
 
         .pres-impact-grid, .pres-pricing-grid {
@@ -653,14 +655,37 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
             top: 60px;
             padding: 6px 12px;
           }
-          .pres-team-grid, .pres-team-grid-bottom, .pres-impact-grid, .pres-pricing-grid {
+          .pres-team-grid {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            overscroll-behavior-x: contain;
+            gap: 12px;
+            margin: 0 -12px;
+            padding: 0 12px 12px;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+          }
+          .pres-team-grid::-webkit-scrollbar {
+            display: none;
+          }
+          .pres-team-card {
+            flex: 0 0 min(72vw, 250px);
+            scroll-snap-align: center;
+          }
+          .pres-team-avatar {
+            height: min(34vh, 240px);
+          }
+          .pres-impact-grid, .pres-pricing-grid {
             grid-template-columns: 1fr;
           }
           .pres-footer {
-            width: 95%;
+            bottom: max(8px, env(safe-area-inset-bottom));
+            width: calc(100% - 16px);
+            max-width: 520px;
             justify-content: space-between;
-            gap: 4px;
-            padding: 6px 10px;
+            gap: 3px;
+            padding: 6px 7px;
           }
           .pres-dots {
             gap: 4px;
@@ -672,6 +697,30 @@ export default function PresentationView({ onSelectMember, onSwitchToScroll }) {
           }
           .pres-nav-btn span {
             font-size: 0.75rem;
+          }
+          .pres-nav-btn {
+            min-width: 42px;
+            justify-content: center;
+            padding: 6px 9px;
+          }
+          .pres-nav-btn.highlight span {
+            display: none;
+          }
+          .presentation-container {
+            padding-bottom: 82px;
+          }
+        }
+
+        @media (max-width: 390px) {
+          .pres-dot {
+            width: 22px;
+            height: 22px;
+          }
+          .pres-dots {
+            gap: 3px;
+          }
+          .pres-nav-btn > span {
+            display: none;
           }
         }
       `}</style>

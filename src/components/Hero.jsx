@@ -1,89 +1,94 @@
 import React from 'react';
-import { Users, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import { ArrowDown, ArrowRight, Sparkles, Users } from 'lucide-react';
+import { teamMembers } from '../data/membersData';
+import Reveal from './Reveal';
 
-export default function Hero() {
+const shortRoles = [
+  'Project Lead',
+  'Full-stack',
+  'UI/UX',
+  'AI & Data',
+  'Community',
+];
+
+export default function Hero({ onSelectMember }) {
   return (
-    <section
-      id="hero"
-      style={{
-        minHeight: '100vh',
-        paddingTop: '110px',
-        paddingBottom: '60px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        zIndex: 1,
-      }}
-    >
-      <div className="container" style={{ textAlign: 'center' }}>
-        {/* Badge */}
-        <div className="hero-badge">
-          <Sparkles size={16} /> Team Khát Vọng (CalmX) — HUIT STARTUP 2026
-        </div>
+    <section id="hero" className="team-first-hero">
+      <div className="hero-aurora hero-aurora-one" aria-hidden="true" />
+      <div className="hero-aurora hero-aurora-two" aria-hidden="true" />
 
-        {/* Main Title */}
-        <h1 className="hero-title">
-          Trải Nghiệm Không Gian Số <br />
-          <span className="cyber-text">CalmX Digital Orbit</span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="hero-subtitle">
-          Nền tảng check-in cảm xúc & đồng hành tự chăm sóc sức khỏe tinh thần.
-          Kết nối trí tuệ nhân tạo <strong style={{ color: '#c084fc' }}>AI Caly</strong> cùng 5 thành viên nhóm nhiệt huyết!
-        </p>
-
-        {/* Cloud Logo with glow ring */}
-        <div className="hero-logo-wrapper floating-anim">
-          {/* Outer glow ring */}
-          <div className="hero-logo-ring core-rotate" />
-          {/* Inner glow ring */}
-          <div className="hero-logo-ring-inner" />
-          {/* Cloud Logo Image */}
-          <div className="hero-logo-container core-pulse">
-            <img
-              src="/calmx-cloud-logo.png"
-              alt="CalmX Cloud Logo"
-              className="hero-logo-img"
-            />
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="hero-buttons">
-          <a href="#team" className="btn-primary">
-            <Users size={18} /> Gặp Mặt 5 Thành Viên <ArrowRight size={18} />
-          </a>
-          <a href="#demo" className="btn-secondary">
-            <ShieldCheck size={18} /> Dùng Thử App Demo
-          </a>
-        </div>
-
-        {/* Quick Stats Grid */}
-        <div className="hero-stats-grid">
-          <div className="glass-card hero-stat-card">
-            <div className="hero-stat-value" style={{ color: '#c084fc' }}>05</div>
-            <div className="hero-stat-label">Thành Viên Siêu Ngầu</div>
+      <div className="container team-first-hero-inner">
+        <Reveal className="hero-copy">
+          <div className="hero-badge">
+            <Sparkles size={16} /> Team Khát Vọng · HUIT STARTUP 2026
           </div>
 
-          <div className="glass-card hero-stat-card">
-            <div className="hero-stat-value" style={{ color: '#38bdf8' }}>06</div>
-            <div className="hero-stat-label">Màn Hình App Demo</div>
+          <h1 className="hero-title">
+            5 cá tính. 1 quỹ đạo.
+            <br />
+            <span className="cyber-text">Cùng tạo nên CalmX.</span>
+          </h1>
+
+          <p className="hero-subtitle">
+            Gặp gỡ đội ngũ trẻ đứng sau nền tảng chăm sóc sức khỏe tinh thần:
+            từ chiến lược, công nghệ, trải nghiệm, AI đến cộng đồng.
+          </p>
+
+          <div className="hero-buttons">
+            <a href="#team" className="btn-primary">
+              <Users size={18} /> Khám Phá Đội Ngũ <ArrowDown size={18} />
+            </a>
+            <a href="#demo" className="btn-secondary">
+              Trải Nghiệm CalmX <ArrowRight size={18} />
+            </a>
+          </div>
+        </Reveal>
+
+        <Reveal className="hero-member-stage" delay={120}>
+          <div className="hero-member-stage-head">
+            <div>
+              <span className="hero-member-kicker">The minds behind CalmX</span>
+              <h2>Những người biến sự thấu cảm thành sản phẩm</h2>
+            </div>
+            <div className="hero-team-count" aria-label="Năm thành viên">
+              <strong>05</strong>
+              <span>thành viên</span>
+            </div>
           </div>
 
-          <div className="glass-card hero-stat-card">
-            <div className="hero-stat-value" style={{ color: '#f43f5e' }}>AI Caly</div>
-            <div className="hero-stat-label">Trợ Lý Thấu Cảm</div>
+          <div className="hero-member-rail" aria-label="Danh sách thành viên CalmX">
+            {teamMembers.map((member, index) => (
+              <button
+                type="button"
+                key={member.id}
+                className="hero-member-card"
+                style={{ '--member-index': index }}
+                onClick={() => onSelectMember(member)}
+                aria-label={`Xem hồ sơ ${member.name}`}
+              >
+                <span className="hero-member-image">
+                  <img
+                    src={member.image}
+                    alt=""
+                    loading={index < 2 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    draggable="false"
+                  />
+                  <span className="hero-member-number">0{index + 1}</span>
+                </span>
+                <span className="hero-member-info">
+                  <strong>{member.name}</strong>
+                  <span>{shortRoles[index]}</span>
+                </span>
+              </button>
+            ))}
           </div>
 
-          <div className="glass-card hero-stat-card">
-            <div className="hero-stat-value" style={{ color: '#a855f7' }}>432 Hz</div>
-            <div className="hero-stat-label">Âm Thanh Thư Giãn</div>
+          <div className="hero-member-hint">
+            Chạm vào từng thành viên để xem câu chuyện, kỹ năng và dấu ấn cá nhân.
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
 }
-
