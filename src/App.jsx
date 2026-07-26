@@ -8,7 +8,7 @@ import TeamModal from './components/TeamModal';
 import AppDemo from './components/AppDemo';
 import ImpactPricing from './components/ImpactPricing';
 import Footer from './components/Footer';
-import PresentationView from './components/PresentationView';
+import CinematicIntro from './components/CinematicIntro';
 import ScrollProgress from './components/ScrollProgress';
 import AmbientMotion from './components/AmbientMotion';
 
@@ -28,9 +28,24 @@ const writePreference = (key, value) => {
   }
 };
 
+const useMediaQuery = (query) => {
+  const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(query);
+    const handleChange = (event) => setMatches(event.matches);
+
+    setMatches(mediaQuery.matches);
+    mediaQuery.addEventListener?.('change', handleChange);
+    return () => mediaQuery.removeEventListener?.('change', handleChange);
+  }, [query]);
+
+  return matches;
+};
+
 export default function App() {
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const supportsCustomCursor = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  const supportsCustomCursor = useMediaQuery('(hover: hover) and (pointer: fine)');
   const [performanceMode, setPerformanceMode] = useState(
     () => readPreference('calmx_performance_mode', 'false') === 'true' || prefersReducedMotion
   );
@@ -41,9 +56,7 @@ export default function App() {
       supportsCustomCursor
   );
   const [selectedMember, setSelectedMember] = useState(null);
-  const [viewMode, setViewMode] = useState(
-    () => readPreference('calmx_view_mode', 'scroll')
-  );
+  const [showIntro, setShowIntro] = useState(true);
 
   useEffect(() => {
     writePreference('calmx_performance_mode', String(performanceMode));
@@ -54,44 +67,52 @@ export default function App() {
   }, [cursorEnabled]);
 
   useEffect(() => {
-    writePreference('calmx_view_mode', viewMode);
-  }, [viewMode]);
+    if (prefersReducedMotion) {
+      setPerformanceMode(true);
+      setCursorEnabled(false);
+    }
+  }, [prefersReducedMotion]);
 
   return (
-    <div className="calmx-app-root">
+    <div className={`calmx-app-root ${performanceMode ? 'performance-mode' : ''}`}>
       {/* Interactive WebGL / Canvas particle background */}
       <CanvasBackground performanceMode={performanceMode} />
-      <AmbientMotion />
+      <AmbientMotion performanceMode={performanceMode} />
 
       {/* Futuristic neon custom cursor */}
       <CustomCursor enabled={cursorEnabled && supportsCustomCursor} />
-      <ScrollProgress />
+      {!showIntro && <ScrollProgress />}
 
-      {/* Main Navbar with ViewMode switcher */}
-      <Navbar
-        performanceMode={performanceMode}
-        setPerformanceMode={setPerformanceMode}
-        cursorEnabled={cursorEnabled}
-        setCursorEnabled={setCursorEnabled}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-      />
+      {!showIntro && (
+        <>
+          <a className="skip-link" href="#main-content">Bỏ qua điều hướng</a>
+          <Navbar
+            performanceMode={performanceMode}
+            setPerformanceMode={setPerformanceMode}
+            cursorEnabled={cursorEnabled}
+            setCursorEnabled={setCursorEnabled}
+            onReplayIntro={() => {
+              setSelectedMember(null);
+              window.scrollTo({ top: 0, behavior: 'auto' });
+              setShowIntro(true);
+            }}
+          />
+        </>
+      )}
 
-      {/* VIEW MODE 1: CINEMATIC PRESENTATION DECK (Trình chiếu từng lớp như Video) */}
-      {viewMode === 'presentation' ? (
-        <PresentationView
-          onSelectMember={(member) => setSelectedMember(member)}
-          onSwitchToScroll={() => setViewMode('scroll')}
+      {showIntro ? (
+        <CinematicIntro
+          reducedMotion={prefersReducedMotion}
+          onComplete={() => setShowIntro(false)}
         />
       ) : (
-        /* VIEW MODE 2: CONTINUOUS SCROLL MODE (Cuộn trang truyền thống) */
-        <>
+        <main id="main-content" tabIndex="-1">
           <Hero onSelectMember={setSelectedMember} />
           <TeamSection onSelectMember={(member) => setSelectedMember(member)} />
           <AppDemo />
           <ImpactPricing />
           <Footer />
-        </>
+        </main>
       )}
 
       {/* Fullscreen Member Detail Modal (Works seamlessly in both modes!) */}

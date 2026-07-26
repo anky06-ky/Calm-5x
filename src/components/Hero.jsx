@@ -33,7 +33,7 @@ export default function Hero({ onSelectMember }) {
 
           <p className="hero-subtitle">
             Gặp gỡ đội ngũ trẻ đứng sau nền tảng chăm sóc sức khỏe tinh thần:
-            từ chiến lược, công nghệ, trải nghiệm, AI đến cộng đồng.
+            từ chiến lược, công nghệ, trải nghiệm đến hai hướng AI chuyên sâu.
           </p>
 
           <div className="hero-buttons">
@@ -79,6 +79,7 @@ export default function Hero({ onSelectMember }) {
                     src={member.image}
                     alt=""
                     loading={index < 2 ? 'eager' : 'lazy'}
+                    fetchPriority={index === 0 ? 'high' : 'auto'}
                     decoding="async"
                     draggable="false"
                   />

@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Sparkles, Volume2, VolumeX, Zap, Menu, X, MousePointer, ShieldCheck, Film, Layers } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Sparkles, Volume2, VolumeX, Zap, Menu, X, MousePointer, ShieldCheck, Film } from 'lucide-react';
 
 export default function Navbar({
   performanceMode,
   setPerformanceMode,
   cursorEnabled,
   setCursorEnabled,
-  viewMode,
-  setViewMode
+  onReplayIntro
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isPlayingSound, setIsPlayingSound] = useState(false);
   const [audioCtx, setAudioCtx] = useState(null);
+  const hamburgerRef = useRef(null);
+  const drawerRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,10 +23,46 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
-    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (!mobileMenuOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const focusFrame = requestAnimationFrame(() => {
+      drawerRef.current?.querySelector('button')?.focus();
+    });
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMobileMenuOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const focusable = drawerRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      cancelAnimationFrame(focusFrame);
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      hamburgerRef.current?.focus();
+    };
   }, [mobileMenuOpen]);
 
   useEffect(() => () => {
@@ -63,6 +100,10 @@ export default function Navbar({
   ];
 
   const closeMobile = () => setMobileMenuOpen(false);
+  const replayIntro = () => {
+    closeMobile();
+    onReplayIntro?.();
+  };
 
   return (
     <>
@@ -79,33 +120,24 @@ export default function Navbar({
             </div>
           </a>
 
-          {/* Mode Switcher Toggle Button */}
+          {/* Replay the automatic cinematic opening */}
           <div className="navbar-mode-switch">
             <button
-              onClick={() => setViewMode(viewMode === 'presentation' ? 'scroll' : 'presentation')}
+              onClick={replayIntro}
               className="mode-toggle-btn"
-              title={viewMode === 'presentation' ? 'Chuyển sang chế độ cuộn trang' : 'Chuyển sang chế độ trình chiếu điện ảnh'}
+              title="Xem lại phần mở đầu tự động"
             >
-              {viewMode === 'presentation' ? (
-                <>
-                  <Film size={16} color="#c084fc" /> 🎬 <span className="mode-btn-text">Đang Trình Chiếu</span>
-                </>
-              ) : (
-                <>
-                  <Layers size={16} color="#38bdf8" /> 📜 <span className="mode-btn-text">Đang Cuộn Trang</span>
-                </>
-              )}
+              <Film size={16} color="#c084fc" />
+              <span className="mode-btn-text">Xem Intro</span>
             </button>
           </div>
 
           {/* Desktop Nav */}
-          {viewMode === 'scroll' && (
-            <nav className="navbar-desktop-nav">
-              {navLinks.map((link) => (
-                <a key={link.href} href={link.href} className="nav-link">{link.label}</a>
-              ))}
-            </nav>
-          )}
+          <nav className="navbar-desktop-nav">
+            {navLinks.map((link) => (
+              <a key={link.href} href={link.href} className="nav-link">{link.label}</a>
+            ))}
+          </nav>
 
           {/* Right Controls */}
           <div className="navbar-controls">
@@ -124,7 +156,14 @@ export default function Navbar({
             </a>
 
             {/* Mobile Hamburger */}
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="navbar-hamburger" aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" aria-label="Mở menu điều hướng">
+            <button
+              ref={hamburgerRef}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="navbar-hamburger"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
+              aria-label={mobileMenuOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
+            >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
@@ -134,35 +173,40 @@ export default function Navbar({
       {/* Mobile Drawer Overlay */}
       {mobileMenuOpen && (
         <div className="mobile-drawer-overlay" onClick={closeMobile}>
-          <div id="mobile-navigation" className="mobile-drawer" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Điều hướng">
+          <div
+            ref={drawerRef}
+            id="mobile-navigation"
+            className="mobile-drawer"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Điều hướng"
+          >
             <div className="mobile-drawer-header">
               <div className="navbar-brand-name" style={{ fontSize: '1.6rem' }}>Calm<span>X</span></div>
-              <button onClick={closeMobile} className="navbar-icon-btn"><X size={22} /></button>
-            </div>
-
-            {/* Mode Switcher in Drawer */}
-            <div style={{ marginBottom: '16px' }}>
-              <button
-                onClick={() => {
-                  setViewMode(viewMode === 'presentation' ? 'scroll' : 'presentation');
-                  closeMobile();
-                }}
-                className="btn-primary"
-                style={{ width: '100%', justifyContent: 'center', background: 'linear-gradient(135deg, #a855f7, #06b6d4)' }}
-              >
-                {viewMode === 'presentation' ? '📜 Chuyển Sang Cuộn Trang' : '🎬 Chuyển Sang Trình Chiếu'}
+              <button onClick={closeMobile} className="navbar-icon-btn" aria-label="Đóng menu">
+                <X size={22} />
               </button>
             </div>
 
-            {viewMode === 'scroll' && (
-              <nav className="mobile-drawer-nav">
-                {navLinks.map((link) => (
-                  <a key={link.href} href={link.href} className="mobile-drawer-link" onClick={closeMobile}>
-                    {link.label}
-                  </a>
-                ))}
-              </nav>
-            )}
+            {/* Replay intro in Drawer */}
+            <div style={{ marginBottom: '16px' }}>
+              <button
+                onClick={replayIntro}
+                className="btn-primary"
+                style={{ width: '100%', justifyContent: 'center', background: 'linear-gradient(135deg, #a855f7, #06b6d4)' }}
+              >
+                <Film size={17} /> Xem Lại Intro
+              </button>
+            </div>
+
+            <nav className="mobile-drawer-nav">
+              {navLinks.map((link) => (
+                <a key={link.href} href={link.href} className="mobile-drawer-link" onClick={closeMobile}>
+                  {link.label}
+                </a>
+              ))}
+            </nav>
 
             <div className="mobile-drawer-controls">
               <button onClick={toggleSound} className={`navbar-icon-btn ${isPlayingSound ? 'active-purple' : ''}`}>
@@ -189,12 +233,12 @@ export default function Navbar({
       <style>{`
         .navbar-root {
           position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-          padding: 16px 0;
+          padding: calc(16px + env(safe-area-inset-top, 0px)) 0 16px;
           background: transparent;
           transition: all 0.3s ease;
         }
         .navbar-scrolled {
-          padding: 10px 0;
+          padding: calc(10px + env(safe-area-inset-top, 0px)) 0 10px;
           background: rgba(7, 5, 16, 0.88);
           backdrop-filter: blur(16px);
           border-bottom: 1px solid rgba(192, 132, 252, 0.2);
@@ -276,6 +320,7 @@ export default function Navbar({
         }
         .navbar-hamburger {
           display: none;
+          min-width: 44px; min-height: 44px; align-items: center; justify-content: center;
           background: none; border: none; color: #fff; cursor: pointer; padding: 4px;
         }
 
@@ -291,7 +336,11 @@ export default function Navbar({
           width: min(320px, 85vw);
           background: linear-gradient(180deg, rgba(15, 10, 35, 0.98), rgba(7, 5, 16, 0.99));
           border-left: 1px solid rgba(192, 132, 252, 0.3);
-          padding: 24px 20px;
+          padding:
+            calc(24px + env(safe-area-inset-top, 0px))
+            calc(20px + env(safe-area-inset-right, 0px))
+            calc(24px + env(safe-area-inset-bottom, 0px))
+            20px;
           display: flex; flex-direction: column;
           animation: slideIn 0.3s ease;
           overflow-y: auto;

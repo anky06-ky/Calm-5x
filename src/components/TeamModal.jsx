@@ -14,6 +14,7 @@ import { teamMembers } from '../data/membersData';
 
 export default function TeamModal({ member, onClose, onSelectMember }) {
   const closeButtonRef = useRef(null);
+  const modalRef = useRef(null);
   const memberIndex = member
     ? teamMembers.findIndex((item) => item.id === member.id)
     : -1;
@@ -24,37 +25,75 @@ export default function TeamModal({ member, onClose, onSelectMember }) {
     onSelectMember(teamMembers[nextIndex]);
   };
 
+  const isOpen = Boolean(member);
+
   useEffect(() => {
-    if (!member) return undefined;
+    if (!isOpen) return undefined;
     const previousOverflow = document.body.style.overflow;
     const previouslyFocused = document.activeElement;
     document.body.style.overflow = 'hidden';
-    closeButtonRef.current?.focus();
+    const focusFrame = requestAnimationFrame(() => closeButtonRef.current?.focus());
+
+    return () => {
+      cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus?.();
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!member) return undefined;
 
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') onClose();
-      if (event.key === 'ArrowLeft') navigate(-1);
-      if (event.key === 'ArrowRight') navigate(1);
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        navigate(-1);
+        return;
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        navigate(1);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const focusable = modalRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
-      previouslyFocused?.focus?.();
-    };
-  }, [member, onClose]);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [member, onClose, onSelectMember]);
 
   if (!member) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose} role="presentation">
       <article
+        ref={modalRef}
         className="modal-content member-modal"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="member-modal-title"
+        aria-describedby="member-modal-bio"
       >
         <button
           ref={closeButtonRef}
@@ -68,10 +107,10 @@ export default function TeamModal({ member, onClose, onSelectMember }) {
 
         <div className="member-modal-grid">
           <div className="member-modal-media">
-            <img src={member.image} alt={`Ảnh chân dung ${member.name}`} />
+            <img key={member.id} src={member.image} alt={`Ảnh chân dung ${member.name}`} />
             <div className="member-modal-index">
               <span>Thành viên</span>
-              <strong>0{memberIndex + 1} / 05</strong>
+              <strong>0{memberIndex + 1} / 0{teamMembers.length}</strong>
             </div>
           </div>
 
@@ -81,7 +120,7 @@ export default function TeamModal({ member, onClose, onSelectMember }) {
             </div>
             <h2 id="member-modal-title">{member.name}</h2>
             <p className="member-modal-tagline">{member.tagline}</p>
-            <p className="member-modal-bio">{member.bio}</p>
+            <p id="member-modal-bio" className="member-modal-bio">{member.bio}</p>
 
             <div className="member-modal-stats">
               <div>

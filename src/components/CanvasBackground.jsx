@@ -10,8 +10,11 @@ export default function CanvasBackground({ performanceMode }) {
     const ctx = canvas.getContext('2d', { alpha: true });
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    const isCompact = window.innerWidth < 768;
-    const particleCount = reducedMotion ? 24 : performanceMode ? 34 : isCompact ? 46 : 82;
+    const isCompact =
+      !finePointer ||
+      window.innerWidth < 900 ||
+      window.innerHeight < 700;
+    const particleCount = reducedMotion ? 16 : performanceMode ? 22 : isCompact ? 32 : 72;
     const colors = [
       'rgba(168, 85, 247, ',
       'rgba(6, 182, 212, ',

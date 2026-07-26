@@ -9,11 +9,15 @@ export default function CustomCursor({ enabled }) {
 
   useEffect(() => {
     if (!enabled) return;
+    let animFrame;
 
     const onMouseMove = (e) => {
       pointerRef.current = { x: e.clientX, y: e.clientY };
       if (dotRef.current) {
         dotRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
+      }
+      if (!animFrame && !document.hidden) {
+        animFrame = requestAnimationFrame(followMouse);
       }
     };
 
@@ -35,8 +39,8 @@ export default function CustomCursor({ enabled }) {
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseover', onMouseOver);
 
-    let animFrame;
     const followMouse = () => {
+      animFrame = undefined;
       const trailing = trailingRef.current;
       const pointer = pointerRef.current;
       trailing.x += (pointer.x - trailing.x) * 0.18;
@@ -44,13 +48,29 @@ export default function CustomCursor({ enabled }) {
       if (ringRef.current) {
         ringRef.current.style.transform = `translate3d(${trailing.x}px, ${trailing.y}px, 0) translate(-50%, -50%)`;
       }
-      animFrame = requestAnimationFrame(followMouse);
+      const hasDistance =
+        Math.abs(pointer.x - trailing.x) > 0.2 ||
+        Math.abs(pointer.y - trailing.y) > 0.2;
+      if (hasDistance && !document.hidden) {
+        animFrame = requestAnimationFrame(followMouse);
+      }
     };
-    followMouse();
+
+    const handleVisibility = () => {
+      if (document.hidden && animFrame) {
+        cancelAnimationFrame(animFrame);
+        animFrame = undefined;
+      } else if (!document.hidden && !animFrame) {
+        animFrame = requestAnimationFrame(followMouse);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseover', onMouseOver);
-      cancelAnimationFrame(animFrame);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (animFrame) cancelAnimationFrame(animFrame);
     };
   }, [enabled]);
 

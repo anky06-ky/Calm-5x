@@ -8,16 +8,22 @@ const orbs = [
   { left: '52%', top: '84%', size: 58, duration: 15, delay: -6, color: '#c084fc' },
 ];
 
-export default function AmbientMotion() {
+export default function AmbientMotion({ performanceMode = false }) {
   const layerRef = useRef(null);
 
   useEffect(() => {
     const layer = layerRef.current;
-    if (!layer || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (
+      !layer ||
+      performanceMode ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
       return undefined;
     }
 
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (!finePointer) return undefined;
+
     let frameId;
     let currentX = 0;
     let currentY = 0;
@@ -49,7 +55,7 @@ export default function AmbientMotion() {
       }
     };
 
-    if (finePointer) window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
     window.addEventListener('scroll', handleScroll, { passive: true });
     document.addEventListener('visibilitychange', handleVisibility);
     frameId = requestAnimationFrame(render);
@@ -60,7 +66,7 @@ export default function AmbientMotion() {
       document.removeEventListener('visibilitychange', handleVisibility);
       cancelAnimationFrame(frameId);
     };
-  }, []);
+  }, [performanceMode]);
 
   return (
     <div ref={layerRef} className="ambient-motion" aria-hidden="true">
