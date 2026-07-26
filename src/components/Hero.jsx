@@ -25,7 +25,7 @@ export default function Hero({ onSelectMember }) {
 
           <p className="hero-subtitle">
             Gặp gỡ đội ngũ trẻ đứng sau nền tảng chăm sóc sức khỏe tinh thần:
-            từ chiến lược, công nghệ, trải nghiệm đến hai hướng AI chuyên sâu.
+            từ điều phối, tài chính, thị trường đến AI Caly và dữ liệu cảm xúc.
           </p>
 
           <div className="hero-buttons">

@@ -108,11 +108,11 @@ export default function Footer() {
           <div>
             <div style={{ fontWeight: '700', marginBottom: '12px', color: '#c084fc' }}>Thành Viên Nòng Cốt</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.88rem', color: '#d1d5db' }}>
-              <div>• Hoàng Phú Thịnh (Leader)</div>
-              <div>• Huỳnh Quang Sang (Developer)</div>
-              <div>• Đặng Khánh Linh (UI/UX)</div>
-              <div>• Nguyễn Phạm Trọng Khang (AI)</div>
-              <div>• Trần An Kỳ (AI Engineer)</div>
+              <div>• Hoàng Phú Thịnh (Điều phối & Chiến lược)</div>
+              <div>• Huỳnh Quang Sang (Tài chính & Vận hành)</div>
+              <div>• Đặng Khánh Linh (Marketing & Đối tác)</div>
+              <div>• Nguyễn Phạm Trọng Khang (Dữ liệu & Dashboard)</div>
+              <div>• Trần An Kỳ (Kỹ thuật AI Caly)</div>
             </div>
           </div>
 

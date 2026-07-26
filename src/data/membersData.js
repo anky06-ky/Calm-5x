@@ -2,13 +2,13 @@ export const teamMembers = [
   {
     id: 'thinh-hoang',
     name: 'Hoàng Phú Thịnh',
-    role: 'Trưởng Nhóm / Project Manager',
-    shortRole: 'Trưởng nhóm · Chiến lược',
-    tagline: 'Định hướng chiến lược & Điều phối dự án CalmX',
+    role: 'Điều phối Dự án & Chiến lược',
+    shortRole: 'Điều phối · Chiến lược',
+    tagline: 'Điều phối đội ngũ & Định hướng chiến lược CalmX',
     image: '/members/Hoàng_Phú_Thịnh.jpg',
     isPlaceholder: false,
-    bio: 'Chịu trách nhiệm định hình chiến lược sản phẩm, kết nối cố vấn chuyên môn và điều hành tổng thể hành trình phát triển dự án CalmX tại HUIT STARTUP 2026.',
-    skills: ['Project Management', 'Product Strategy', 'Startup Pitching', 'Agile Leadership'],
+    bio: 'Phụ trách điều phối công việc, định hướng chiến lược, phát triển mô hình kinh doanh và kết nối các nguồn lực để bảo đảm dự án CalmX vận hành đúng mục tiêu.',
+    skills: ['Project Coordination', 'Strategic Planning', 'Business Model', 'Startup Pitching'],
     stats: {
       contribution: '98%',
       projects: '12+',
@@ -25,13 +25,13 @@ export const teamMembers = [
   {
     id: 'sang-huynh',
     name: 'Huỳnh Quang Sang',
-    role: 'Full-stack Developer & UI Designer',
-    shortRole: 'Full-stack · UI Engineering',
-    tagline: 'Kiến trúc sư hệ thống & Trải nghiệm giao diện số',
+    role: 'Phụ trách Tài chính & Kế hoạch Vận hành',
+    shortRole: 'Tài chính · Vận hành',
+    tagline: 'Hoạch định tài chính & Kế hoạch vận hành CalmX',
     image: '/members/Huỳnh_Quang_Sang.jpg',
     isPlaceholder: false,
-    bio: 'Đóng vai trò nòng cốt trong việc thiết kế kiến trúc Frontend/Backend mượt mà và xây dựng các hiệu ứng chuyển động đỉnh cao cho ứng dụng CalmX.',
-    skills: ['React / Next.js', 'Tailwind & WebGL', 'Node.js System', 'UI Micro-interactions'],
+    bio: 'Phụ trách lập kế hoạch tài chính, dự toán chi phí, xây dựng phương án doanh thu và theo dõi ngân sách; đồng thời phối hợp hoàn thiện kế hoạch vận hành cho dự án CalmX.',
+    skills: ['Financial Planning', 'Budget Management', 'Revenue Modeling', 'Operations Planning'],
     stats: {
       contribution: '95%',
       projects: '15+',
@@ -43,18 +43,18 @@ export const teamMembers = [
       github: 'https://github.com',
       email: 'sang.huynh@calmx.app'
     },
-    quote: 'Mỗi dòng code đều mang sứ mệnh xoa dịu cảm xúc người dùng.'
+    quote: 'Một kế hoạch tài chính rõ ràng giúp ý tưởng đi xa và bền vững.'
   },
   {
     id: 'linh-dang',
     name: 'Đặng Khánh Linh',
-    role: 'UI/UX Specialist & Content Strategist',
-    shortRole: 'UI/UX · Nội dung thấu cảm',
-    tagline: 'Sáng tạo trải nghiệm thương hiệu & Nội dung thấu cảm',
+    role: 'Marketing, Truyền thông & Đối tác',
+    shortRole: 'Marketing · Đối tác',
+    tagline: 'Nghiên cứu thị trường & Kết nối đối tác',
     image: '/members/Đặng_Khánh_Linh.jpg',
     isPlaceholder: false,
-    bio: 'Phụ trách nghiên cứu hành vi tâm lý người dùng, thiết kế giao diện màu sắc Lavender nhẹ nhàng và biên soạn kịch bản hội thoại thấu hiểu cho AI Caly.',
-    skills: ['UI/UX Design', 'Empathy Content', 'Figma Prototyping', 'User Research'],
+    bio: 'Phụ trách nghiên cứu thị trường, xây dựng kế hoạch marketing, truyền thông thương hiệu và kết nối các đối tác phù hợp cho dự án CalmX.',
+    skills: ['Market Research', 'Marketing Strategy', 'Brand Communications', 'Partnership Development'],
     stats: {
       contribution: '96%',
       projects: '10+',
@@ -66,18 +66,18 @@ export const teamMembers = [
       github: 'https://github.com',
       email: 'linh.dang@calmx.app'
     },
-    quote: 'Giao diện mượt mà cùng từ ngữ ấm áp chính là liều thuốc tinh thần đầu tiên.'
+    quote: 'Hiểu đúng thị trường giúp CalmX đến đúng người bằng đúng thông điệp.'
   },
   {
     id: 'khang-nguyen',
     name: 'Nguyễn Phạm Trọng Khang',
-    role: 'AI Specialist & Data Analyst',
-    shortRole: 'AI/NLP · Phân tích dữ liệu',
-    tagline: 'Phát triển mô hình AI Caly & Phân tích tâm trạng',
+    role: 'Phân tích Dữ liệu & Phát triển Dashboard',
+    shortRole: 'Dữ liệu · Dashboard',
+    tagline: 'Dữ liệu cảm xúc & Luồng lưu trữ – phân tích',
     image: '/members/Nguyễn_Phạm_Trọng_Khang.jpg',
     isPlaceholder: false,
-    bio: 'Xây dựng thuật toán nhận diện thái độ tâm trạng, tối ưu phản hồi trợ lý ảo AI Caly và thiết lập biểu đồ xu hướng cảm xúc 7 ngày.',
-    skills: ['AI / NLP Models', 'Sentiment Analysis', 'Python & Data Science', 'Algorithm Design'],
+    bio: 'Phụ trách dữ liệu cảm xúc, thiết kế luồng lưu trữ – phân tích và phát triển dashboard theo dõi các chỉ số sản phẩm, giúp đội ngũ quan sát xu hướng và cải thiện trải nghiệm CalmX.',
+    skills: ['Data Analytics', 'Data Pipeline', 'Dashboard Development', 'Sentiment Metrics'],
     stats: {
       contribution: '94%',
       projects: '9+',
@@ -89,18 +89,18 @@ export const teamMembers = [
       github: 'https://github.com',
       email: 'khang.nguyen@calmx.app'
     },
-    quote: 'Trí tuệ nhân tạo trở nên giá trị nhất khi nó học cách thấu hiểu con người.'
+    quote: 'Dữ liệu chỉ có ý nghĩa khi giúp người dùng hiểu rõ hành trình cảm xúc của mình.'
   },
   {
     id: 'ky-tran',
     name: 'Trần An Kỳ',
-    role: 'AI Engineer & Machine Learning Developer',
-    shortRole: 'AI Engineering · Machine Learning',
-    tagline: 'Phát triển AI Caly & Tự động hóa trải nghiệm thông minh',
+    role: 'Kỹ sư AI & Định hướng Kỹ thuật AI Caly',
+    shortRole: 'Kỹ thuật AI · AI Caly',
+    tagline: 'Định hướng kỹ thuật AI Caly & Logic phản hồi',
     image: '/members/Trần_An_Kỳ.jpg',
     isPlaceholder: false,
-    bio: 'Nghiên cứu và triển khai các tính năng trí tuệ nhân tạo cho CalmX, xây dựng luồng xử lý ngôn ngữ tự nhiên, tối ưu phản hồi của AI Caly và kết nối mô hình AI vào trải nghiệm sản phẩm.',
-    skills: ['AI Engineering', 'Machine Learning', 'Prompt Engineering', 'Python & NLP'],
+    bio: 'Phụ trách định hướng kỹ thuật AI Caly, xây dựng logic phản hồi, tích hợp mô hình AI và thiết kế bộ quy tắc an toàn nội dung để trải nghiệm hỗ trợ luôn phù hợp, thấu cảm.',
+    skills: ['AI Engineering', 'Response Logic', 'Prompt Engineering', 'AI Safety'],
     stats: {
       contribution: '97%',
       projects: '14+',
