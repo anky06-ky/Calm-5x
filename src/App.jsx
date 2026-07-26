@@ -73,6 +73,13 @@ export default function App() {
     }
   }, [prefersReducedMotion]);
 
+  const completeIntro = () => {
+    setShowIntro(false);
+    requestAnimationFrame(() => {
+      document.getElementById('main-content')?.focus({ preventScroll: true });
+    });
+  };
+
   return (
     <div className={`calmx-app-root ${performanceMode ? 'performance-mode' : ''}`}>
       {/* Interactive WebGL / Canvas particle background */}
@@ -102,8 +109,9 @@ export default function App() {
 
       {showIntro ? (
         <CinematicIntro
-          reducedMotion={prefersReducedMotion}
-          onComplete={() => setShowIntro(false)}
+          paused={Boolean(selectedMember)}
+          onSelectMember={setSelectedMember}
+          onComplete={completeIntro}
         />
       ) : (
         <main id="main-content" tabIndex="-1">
@@ -117,6 +125,7 @@ export default function App() {
 
       {/* Fullscreen Member Detail Modal (Works seamlessly in both modes!) */}
       <TeamModal
+        compact={showIntro}
         member={selectedMember}
         onClose={() => setSelectedMember(null)}
         onSelectMember={setSelectedMember}

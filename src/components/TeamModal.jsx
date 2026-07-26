@@ -12,7 +12,9 @@ import {
 } from 'lucide-react';
 import { teamMembers } from '../data/membersData';
 
-export default function TeamModal({ member, onClose, onSelectMember }) {
+const modalAccents = ['#c084fc', '#f472b6', '#38bdf8', '#34d399', '#facc15'];
+
+export default function TeamModal({ compact = false, member, onClose, onSelectMember }) {
   const closeButtonRef = useRef(null);
   const modalRef = useRef(null);
   const memberIndex = member
@@ -83,6 +85,45 @@ export default function TeamModal({ member, onClose, onSelectMember }) {
   }, [member, onClose, onSelectMember]);
 
   if (!member) return null;
+
+  if (compact) {
+    return (
+      <div
+        className="modal-overlay intro-profile-overlay"
+        onClick={onClose}
+        role="presentation"
+      >
+        <article
+          ref={modalRef}
+          className="modal-content intro-profile-modal"
+          style={{ '--intro-modal-accent': modalAccents[memberIndex] }}
+          onClick={(event) => event.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="member-modal-title"
+          aria-describedby="member-modal-bio"
+        >
+          <button
+            ref={closeButtonRef}
+            type="button"
+            onClick={onClose}
+            className="member-modal-close"
+            aria-label="Đóng hồ sơ thành viên"
+          >
+            <X size={20} />
+          </button>
+
+          <div className="intro-profile-portrait">
+            <img key={member.id} src={member.image} alt={`Ảnh chân dung ${member.name}`} />
+          </div>
+          <span className="intro-profile-index">Thành viên 0{memberIndex + 1}</span>
+          <h2 id="member-modal-title">{member.name}</h2>
+          <p id="member-modal-bio">{member.shortRole}</p>
+          <small>{member.tagline}</small>
+        </article>
+      </div>
+    );
+  }
 
   return (
     <div className="modal-overlay" onClick={onClose} role="presentation">

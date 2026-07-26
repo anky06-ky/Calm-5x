@@ -3,14 +3,6 @@ import { ArrowDown, ArrowRight, Sparkles, Users } from 'lucide-react';
 import { teamMembers } from '../data/membersData';
 import Reveal from './Reveal';
 
-const shortRoles = [
-  'Project Lead',
-  'Full-stack',
-  'UI/UX',
-  'AI & Data',
-  'AI Engineer',
-];
-
 export default function Hero({ onSelectMember }) {
   const marqueeMembers = [...teamMembers, ...teamMembers];
 
@@ -87,7 +79,7 @@ export default function Hero({ onSelectMember }) {
                 </span>
                 <span className="hero-member-info">
                   <strong>{member.name}</strong>
-                  <span>{shortRoles[index]}</span>
+                  <span>{member.shortRole}</span>
                 </span>
               </button>
             ))}
@@ -104,7 +96,7 @@ export default function Hero({ onSelectMember }) {
               <div className="team-marquee-item" key={`${member.id}-${index}`}>
                 <span>0{(index % teamMembers.length) + 1}</span>
                 <strong>{member.name}</strong>
-                <i>{shortRoles[index % shortRoles.length]}</i>
+                <i>{member.shortRole}</i>
                 <b>✦</b>
               </div>
             ))}

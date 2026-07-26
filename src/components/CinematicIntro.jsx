@@ -6,16 +6,27 @@ import {
   HeartPulse,
   ShieldCheck,
   SkipForward,
-  Sparkles,
-  Users,
 } from 'lucide-react';
 import { teamMembers } from '../data/membersData';
 
 const scenes = [
-  { id: 'welcome', label: 'Xin chào', duration: 4000 },
-  { id: 'team', label: 'Đội ngũ', duration: 7000 },
-  { id: 'project', label: 'Dự án', duration: 5500 },
+  { id: 'prelude', label: 'Mở đầu', duration: 2400 },
+  { id: 'welcome', label: 'Xin chào', duration: 3800 },
+  { id: 'team', label: 'Đội ngũ', duration: 7500 },
+  { id: 'project', label: 'Dự án', duration: 5000 },
 ];
+
+const memberAccents = ['#c084fc', '#f472b6', '#38bdf8', '#34d399', '#facc15'];
+const confettiColors = ['#c084fc', '#f472b6', '#38bdf8', '#34d399', '#facc15'];
+const teamConfetti = Array.from({ length: 34 }, (_, index) => ({
+  left: `${(index * 37 + 5) % 98}%`,
+  top: `${(index * 53 + 3) % 94}%`,
+  size: 5 + (index % 4) * 2,
+  color: confettiColors[index % confettiColors.length],
+  duration: 6.8 + (index % 5) * 0.8,
+  delay: -(index % 9) * 0.7,
+  round: index % 3 === 0,
+}));
 
 const floatingEmotions = [
   { symbol: '😄', left: '7%', top: '28%', size: 46, duration: 9.5, delay: -1.2 },
@@ -57,11 +68,18 @@ const projectFeatures = [
   },
 ];
 
-export default function CinematicIntro({ onComplete, reducedMotion = false }) {
+export default function CinematicIntro({
+  onComplete,
+  onSelectMember,
+  paused = false,
+}) {
   const [sceneIndex, setSceneIndex] = useState(0);
   const [isPageVisible, setIsPageVisible] = useState(() => !document.hidden);
   const onCompleteRef = useRef(onComplete);
+  const remainingTimeRef = useRef(scenes[0].duration);
+  const timerStartedAtRef = useRef(0);
   const scene = scenes[sceneIndex];
+  const sceneDuration = scene.duration;
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
@@ -81,26 +99,35 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
   }, []);
 
   useEffect(() => {
-    if (!isPageVisible) return undefined;
+    remainingTimeRef.current = sceneDuration;
+  }, [sceneDuration, sceneIndex]);
 
-    const duration = reducedMotion
-      ? Math.min(scene.duration, sceneIndex === scenes.length - 1 ? 1800 : 1200)
-      : scene.duration;
+  useEffect(() => {
+    if (!isPageVisible || paused) return undefined;
+
+    timerStartedAtRef.current = performance.now();
     const timer = window.setTimeout(() => {
       if (sceneIndex < scenes.length - 1) {
         setSceneIndex((index) => index + 1);
       } else {
         onCompleteRef.current?.();
       }
-    }, duration);
+    }, remainingTimeRef.current);
 
-    return () => window.clearTimeout(timer);
-  }, [isPageVisible, reducedMotion, scene.duration, sceneIndex]);
+    return () => {
+      window.clearTimeout(timer);
+      const elapsed = performance.now() - timerStartedAtRef.current;
+      remainingTimeRef.current = Math.max(0, remainingTimeRef.current - elapsed);
+    };
+  }, [isPageVisible, paused, sceneDuration, sceneIndex]);
 
   const finishIntro = () => onCompleteRef.current?.();
 
   return (
-    <main className="cinematic-intro" aria-label="Mở đầu giới thiệu CalmX">
+    <main
+      className={`cinematic-intro ${paused || !isPageVisible ? 'is-paused' : ''}`}
+      aria-label="Mở đầu giới thiệu CalmX"
+    >
       <div className="intro-grid-glow" aria-hidden="true" />
       <div className="intro-light-beam intro-light-beam-one" aria-hidden="true" />
       <div className="intro-light-beam intro-light-beam-two" aria-hidden="true" />
@@ -140,15 +167,6 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
       </div>
 
       <header className="intro-topbar">
-        <div className="intro-brand">
-          <span className="intro-brand-icon">
-            <Sparkles size={18} />
-          </span>
-          <span>
-            Calm<strong>X</strong>
-            <small>HUIT STARTUP 2026</small>
-          </span>
-        </div>
         <button type="button" className="intro-skip" onClick={finishIntro}>
           Bỏ qua <SkipForward size={17} />
         </button>
@@ -157,48 +175,92 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
       <section
         key={scene.id}
         className={`intro-scene intro-scene-${scene.id}`}
-        aria-live="polite"
+        style={{ '--scene-duration': `${sceneDuration}ms` }}
         aria-label={`${scene.label}, bước ${sceneIndex + 1} trên ${scenes.length}`}
       >
-        {scene.id === 'welcome' && (
-          <div className="intro-welcome">
+        <span className="intro-live-status" role="status" aria-live="polite">
+          {scene.label}, bước {sceneIndex + 1} trên {scenes.length}
+        </span>
+        {scene.id === 'prelude' && (
+          <div className="intro-prelude">
             <div className="intro-logo-stage" aria-hidden="true">
               <span className="intro-logo-orbit" />
               <span className="intro-logo-orbit intro-logo-orbit-inner" />
               <img src="/calmx-cloud-logo.png" alt="" />
             </div>
+            <h1>CALM<span>X</span></h1>
+            <strong>HUIT STARTUP 2026</strong>
+            <p>TEAM KHÁT VỌNG</p>
+          </div>
+        )}
+
+        {scene.id === 'welcome' && (
+          <div className="intro-welcome">
             <div className="intro-eyebrow">
-              <Sparkles size={16} /> Một lời chào từ Team Khát Vọng
+              Team Khát Vọng xin gửi lời
             </div>
             <h1>
-              Xin chào!
-              <span>Tụi mình là CalmX.</span>
+              <span>Xin Chào</span>
+              <span>Từ CalmX</span>
             </h1>
-            <p>
-              Năm con người, năm góc nhìn và cùng một mong muốn:
-              giúp việc chăm sóc cảm xúc trở nên gần gũi hơn mỗi ngày.
-            </p>
+            <div className="intro-floral-divider" aria-hidden="true">
+              <i>🌿</i><span /><b>🌸</b><span /><i>🌿</i>
+            </div>
+            <div className="intro-welcome-card">
+              <strong>CALMX · CHĂM SÓC CẢM XÚC MỖI NGÀY</strong>
+              <p>
+                Năm con người, năm góc nhìn cùng tạo nên một không gian
+                lắng nghe, thấu hiểu và đồng hành.
+              </p>
+            </div>
           </div>
         )}
 
         {scene.id === 'team' && (
           <div className="intro-team">
+            <div className="intro-team-confetti" aria-hidden="true">
+              {teamConfetti.map((particle, index) => (
+                <span
+                  key={index}
+                  style={{
+                    '--confetti-left': particle.left,
+                    '--confetti-top': particle.top,
+                    '--confetti-size': `${particle.size}px`,
+                    '--confetti-color': particle.color,
+                    '--confetti-duration': `${particle.duration}s`,
+                    '--confetti-delay': `${particle.delay}s`,
+                    '--confetti-radius': particle.round ? '50%' : '2px',
+                  }}
+                />
+              ))}
+            </div>
+
+            <blockquote className="intro-team-quote">
+              <span>❞</span>
+              <p>
+                Chúng mình không chỉ xây một ứng dụng,
+                <br />
+                chúng mình tạo nên một nơi để <strong>cảm xúc được lắng nghe.</strong>
+              </p>
+              <span>❞</span>
+            </blockquote>
+
             <div className="intro-scene-heading">
-              <div className="intro-eyebrow">
-                <Users size={16} /> Những người đứng sau CalmX
-              </div>
-              <h2>
-                5 thành viên. <span>1 quỹ đạo.</span>
-              </h2>
-              <p>Mỗi người phụ trách một mảnh ghép để CalmX trở thành sản phẩm hoàn chỉnh.</p>
+              <h2>Đội ngũ CalmX</h2>
             </div>
 
             <div className="intro-team-grid">
               {teamMembers.map((member, index) => (
-                <article
+                <button
+                  type="button"
                   key={member.id}
                   className="intro-member-card"
-                  style={{ '--intro-member-index': index }}
+                  style={{
+                    '--intro-member-index': index,
+                    '--member-accent': memberAccents[index],
+                  }}
+                  onClick={() => onSelectMember?.(member)}
+                  aria-label={`Xem hồ sơ ${member.name}`}
                 >
                   <div className="intro-member-image">
                     <img
@@ -207,15 +269,15 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
                       decoding="async"
                       draggable="false"
                     />
-                    <span>0{index + 1}</span>
                   </div>
                   <div className="intro-member-copy">
                     <strong>{member.name}</strong>
-                    <small>{member.role}</small>
+                    <small>{member.shortRole}</small>
                   </div>
-                </article>
+                </button>
               ))}
             </div>
+            <p className="intro-team-hint">Chạm vào chân dung để xem câu chuyện từng thành viên.</p>
           </div>
         )}
 
@@ -223,11 +285,11 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           <div className="intro-project">
             <div className="intro-project-copy">
               <div className="intro-eyebrow">
-                <ShieldCheck size={16} /> Dự án CalmX
+                <ShieldCheck size={16} /> CalmX xin giới thiệu
               </div>
               <h2>
-                Đồng hành cùng
-                <span>cảm xúc mỗi ngày.</span>
+                Chạm vào
+                <span>Cảm Xúc.</span>
               </h2>
               <p>
                 CalmX kết hợp trải nghiệm check-in, nhật ký cảm xúc và trợ lý AI Caly
@@ -262,15 +324,9 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
       <footer className="intro-timeline" aria-label="Tiến trình mở đầu">
         <div className="intro-progress-track" aria-hidden="true">
           <span
-            key={`${scene.id}-${isPageVisible}`}
+            key={scene.id}
             className="intro-progress-fill"
-            style={{
-              '--intro-duration': `${
-                reducedMotion
-                  ? Math.min(scene.duration, sceneIndex === scenes.length - 1 ? 1800 : 1200)
-                  : scene.duration
-              }ms`,
-            }}
+            style={{ '--intro-duration': `${sceneDuration}ms` }}
           />
         </div>
         <div className="intro-scene-labels">
@@ -440,7 +496,7 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           z-index: 10;
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content: flex-end;
           padding:
             calc(20px + env(safe-area-inset-top, 0px))
             max(24px, env(safe-area-inset-right, 0px))
@@ -516,7 +572,18 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
             clamp(18px, 4vw, 54px)
             calc(112px + env(safe-area-inset-bottom, 0px));
           place-items: center;
-          animation: introSceneIn 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
+          animation: introSceneLifecycle var(--scene-duration) ease-in-out both;
+        }
+
+        .intro-live-status {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          overflow: hidden;
+          clip: rect(0 0 0 0);
+          white-space: nowrap;
+          border: 0;
         }
 
         .intro-eyebrow {
@@ -530,9 +597,43 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           text-transform: uppercase;
         }
 
+        .intro-prelude,
         .intro-welcome {
           max-width: 850px;
           text-align: center;
+        }
+
+        .intro-prelude h1 {
+          margin: 14px 0 10px;
+          font-family: var(--font-heading);
+          font-size: clamp(2.4rem, 6vw, 4.6rem);
+          font-weight: 900;
+          letter-spacing: -0.06em;
+          line-height: 1;
+          animation: introTitleIn 800ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .intro-prelude h1 span {
+          color: #38bdf8;
+        }
+
+        .intro-prelude > strong,
+        .intro-prelude > p {
+          display: block;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+        }
+
+        .intro-prelude > strong {
+          color: #facc15;
+          font-size: clamp(0.72rem, 1.4vw, 1rem);
+        }
+
+        .intro-prelude > p {
+          margin-top: 14px;
+          color: #8f94a6;
+          font-size: clamp(0.58rem, 1vw, 0.72rem);
+          font-weight: 800;
         }
 
         .intro-logo-stage {
@@ -582,46 +683,175 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           animation-duration: 5.5s;
         }
 
-        .intro-welcome h1,
         .intro-scene-heading h2,
         .intro-project h2 {
-          font-family: var(--font-heading);
-          letter-spacing: -0.045em;
+          font-family: var(--font-display);
+          letter-spacing: -0.035em;
         }
 
         .intro-welcome h1 {
-          margin: 13px 0 16px;
-          font-size: clamp(3.2rem, 8vw, 6.8rem);
-          line-height: 0.94;
-          animation: introTitleIn 840ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+          margin: 13px 0 18px;
+          font-family: var(--font-display);
+          font-size: clamp(4rem, 9vw, 7.6rem);
+          letter-spacing: -0.055em;
+          line-height: 0.82;
+        }
+
+        .intro-welcome .intro-eyebrow {
+          animation: introCopyIn 620ms 80ms ease backwards;
         }
 
         .intro-welcome h1 span,
-        .intro-scene-heading h2 span,
         .intro-project h2 span {
           display: block;
           color: transparent;
-          background: linear-gradient(105deg, #fff, #d8b4fe 48%, #38bdf8);
           background-clip: text;
           -webkit-background-clip: text;
+          animation: introTitleIn 760ms 180ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
         }
 
-        .intro-welcome > p {
-          max-width: 650px;
+        .intro-welcome h1 span:last-child {
+          animation-delay: 330ms;
+        }
+
+        .intro-welcome h1 span:first-child {
+          background-image: linear-gradient(105deg, #f472b6, #d946ef 52%, #a855f7);
+        }
+
+        .intro-welcome h1 span:last-child {
+          background-image: linear-gradient(105deg, #22d3ee, #38bdf8 52%, #34d399);
+        }
+
+        .intro-floral-divider {
+          display: flex;
+          max-width: 390px;
+          align-items: center;
+          justify-content: center;
+          gap: 13px;
+          margin: 0 auto 20px;
+          color: #a3e635;
+          animation: introCopyIn 720ms 430ms ease backwards;
+        }
+
+        .intro-floral-divider span {
+          width: 78px;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(192, 132, 252, 0.55));
+        }
+
+        .intro-floral-divider span:nth-of-type(2) {
+          background: linear-gradient(90deg, rgba(56, 189, 248, 0.55), transparent);
+        }
+
+        .intro-floral-divider i {
+          font-style: normal;
+        }
+
+        .intro-floral-divider b {
+          font-size: 1.2rem;
+        }
+
+        .intro-welcome-card {
+          max-width: 640px;
           margin: 0 auto;
-          color: #b2b4c1;
-          font-size: clamp(0.95rem, 1.7vw, 1.15rem);
-          line-height: 1.75;
-          animation: introCopyIn 720ms 300ms ease both;
+          padding: 22px 28px;
+          color: #aeb1be;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 20px;
+          background: rgba(25, 31, 45, 0.62);
+          box-shadow: 0 20px 55px rgba(0, 0, 0, 0.2);
+          backdrop-filter: blur(16px);
+          animation: introCopyIn 720ms 560ms ease backwards;
+        }
+
+        .intro-welcome-card strong {
+          color: #facc15;
+          font-size: 0.82rem;
+          letter-spacing: 0.12em;
+        }
+
+        .intro-welcome-card p {
+          margin-top: 10px;
+          font-size: 0.92rem;
+          line-height: 1.7;
         }
 
         .intro-team {
+          position: relative;
           width: 100%;
+          max-width: 980px;
           text-align: center;
         }
 
+        .intro-team-confetti {
+          position: absolute;
+          inset: -18vh -10vw;
+          z-index: 0;
+          overflow: hidden;
+          pointer-events: none;
+          contain: paint;
+          animation: introConfettiFieldIn 800ms 520ms ease backwards;
+        }
+
+        .intro-team-confetti span {
+          position: absolute;
+          top: var(--confetti-top);
+          left: var(--confetti-left);
+          width: var(--confetti-size);
+          height: var(--confetti-size);
+          opacity: 0.9;
+          border-radius: var(--confetti-radius);
+          background: var(--confetti-color);
+          box-shadow: 0 0 13px color-mix(in srgb, var(--confetti-color) 65%, transparent);
+          animation: introConfettiDrift var(--confetti-duration) var(--confetti-delay)
+            ease-in-out infinite;
+        }
+
+        .intro-team-quote,
+        .intro-scene-heading,
+        .intro-team-grid,
+        .intro-team-hint {
+          position: relative;
+          z-index: 1;
+        }
+
+        .intro-team-quote {
+          display: grid;
+          max-width: 680px;
+          grid-template-columns: auto 1fr auto;
+          gap: 14px;
+          align-items: center;
+          margin: 0 auto 22px;
+          padding: 22px 28px;
+          color: #f5f3ff;
+          border: 1px solid rgba(255, 255, 255, 0.13);
+          border-radius: 22px;
+          background: linear-gradient(115deg, rgba(31, 27, 48, 0.74), rgba(20, 48, 48, 0.45));
+          box-shadow: 0 22px 58px rgba(0, 0, 0, 0.24);
+          backdrop-filter: blur(14px);
+          animation: introQuoteIn 760ms 100ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        }
+
+        .intro-team-quote > span {
+          color: #fb7185;
+          font-family: var(--font-display);
+          font-size: 2rem;
+        }
+
+        .intro-team-quote p {
+          font-size: clamp(0.88rem, 1.7vw, 1.15rem);
+          font-style: italic;
+          line-height: 1.7;
+        }
+
+        .intro-team-quote strong {
+          color: #34d399;
+          font-weight: 800;
+        }
+
         .intro-scene-heading {
-          margin-bottom: clamp(20px, 3.5vh, 38px);
+          margin-bottom: 20px;
+          animation: introCopyIn 620ms 280ms ease backwards;
         }
 
         .intro-scene-heading h2,
@@ -631,70 +861,76 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           line-height: 1;
         }
 
-        .intro-scene-heading h2 span {
-          display: inline;
+        .intro-scene-heading h2 {
+          font-size: clamp(1.8rem, 3.6vw, 2.8rem);
         }
 
-        .intro-scene-heading > p {
-          color: #9fa2b1;
-          font-size: 0.95rem;
+        .intro-project h2 span {
+          background-image: linear-gradient(105deg, #f472b6, #c084fc 45%, #38bdf8);
         }
 
         .intro-team-grid {
           display: grid;
-          grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: clamp(9px, 1.5vw, 18px);
+          max-width: 880px;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 20px 26px;
+          margin: 0 auto;
         }
 
         .intro-member-card {
+          display: flex;
           min-width: 0;
-          padding: 9px 9px 13px;
-          overflow: hidden;
-          text-align: left;
-          border: 1px solid rgba(192, 132, 252, 0.2);
-          border-radius: 19px;
-          background: linear-gradient(160deg, rgba(28, 18, 52, 0.88), rgba(10, 7, 23, 0.9));
-          box-shadow: 0 18px 42px rgba(0, 0, 0, 0.26);
+          flex-direction: column;
+          align-items: center;
+          padding: 0;
+          color: inherit;
+          text-align: center;
+          cursor: pointer;
+          border: 0;
+          background: none;
           animation:
-            introMemberIn 760ms calc(180ms + var(--intro-member-index) * 120ms)
-              cubic-bezier(0.16, 1, 0.3, 1) backwards,
-            introMemberGlow 3.6s calc(var(--intro-member-index) * -0.65s) ease-in-out infinite;
+            introMemberIn 760ms calc(440ms + var(--intro-member-index) * 110ms)
+              cubic-bezier(0.16, 1, 0.3, 1) backwards;
+          transition: transform 260ms ease;
+        }
+
+        .intro-member-card:last-child {
+          width: 50%;
+          grid-column: 2 / span 2;
+          justify-self: center;
+        }
+
+        .intro-member-card:hover,
+        .intro-member-card:focus-visible {
+          transform: translateY(-6px) scale(1.04);
         }
 
         .intro-member-image {
           position: relative;
-          aspect-ratio: 4 / 4.25;
+          width: clamp(86px, 8vw, 116px);
+          aspect-ratio: 1;
+          padding: 4px;
           overflow: hidden;
-          border-radius: 13px;
-          background: #120d22;
-        }
-
-        .intro-member-image::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(to top, rgba(7, 5, 16, 0.8), transparent 52%);
+          border: 3px solid var(--member-accent);
+          border-radius: 50%;
+          background: rgba(7, 5, 16, 0.85);
+          box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.12),
+            0 0 24px color-mix(in srgb, var(--member-accent) 42%, transparent);
+          animation: introAvatarPulse 3.4s calc(var(--intro-member-index) * -0.6s)
+            ease-in-out infinite;
         }
 
         .intro-member-image img {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          border-radius: 50%;
           animation: introPortraitZoom 5s ease-out both;
         }
 
-        .intro-member-image span {
-          position: absolute;
-          right: 9px;
-          bottom: 7px;
-          z-index: 2;
-          color: #fff;
-          font-size: 0.7rem;
-          font-weight: 800;
-        }
-
         .intro-member-copy {
-          padding: 10px 4px 0;
+          padding-top: 10px;
         }
 
         .intro-member-copy strong,
@@ -703,11 +939,8 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
         }
 
         .intro-member-copy strong {
-          overflow: hidden;
           color: #fff;
-          font-size: clamp(0.72rem, 1.2vw, 0.95rem);
-          text-overflow: ellipsis;
-          white-space: nowrap;
+          font-size: clamp(0.72rem, 1.1vw, 0.9rem);
         }
 
         .intro-member-copy small {
@@ -715,13 +948,20 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           min-height: 2.4em;
           margin-top: 4px;
           overflow: hidden;
-          color: #c084fc;
-          font-size: clamp(0.54rem, 0.8vw, 0.67rem);
-          font-weight: 700;
-          line-height: 1.2;
-          text-transform: uppercase;
+          color: #777d8f;
+          font-size: clamp(0.54rem, 0.75vw, 0.64rem);
+          font-weight: 600;
+          line-height: 1.3;
           -webkit-box-orient: vertical;
           -webkit-line-clamp: 2;
+        }
+
+        .intro-team-hint {
+          margin-top: 14px;
+          color: #707688;
+          font-size: 0.68rem;
+          font-weight: 700;
+          letter-spacing: 0.05em;
         }
 
         .intro-project {
@@ -821,7 +1061,7 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
 
         .intro-scene-labels {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(4, 1fr);
           margin-top: 10px;
         }
 
@@ -844,9 +1084,24 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           font-style: normal;
         }
 
-        @keyframes introSceneIn {
-          from { opacity: 0; transform: translate3d(0, 24px, 0) scale(0.985); }
-          to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        .cinematic-intro.is-paused .intro-scene,
+        .cinematic-intro.is-paused .intro-progress-fill {
+          animation-play-state: paused;
+        }
+
+        @keyframes introSceneLifecycle {
+          0% {
+            opacity: 0;
+            transform: translate3d(0, 24px, 0) scale(0.985);
+          }
+          10%, 86% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: translate3d(0, -12px, 0) scale(0.992);
+          }
         }
 
         @keyframes introTitleIn {
@@ -919,9 +1174,42 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
         }
 
-        @keyframes introMemberGlow {
-          0%, 100% { border-color: rgba(192, 132, 252, 0.18); }
-          50% { border-color: rgba(56, 189, 248, 0.44); }
+        @keyframes introQuoteIn {
+          from { opacity: 0; transform: translate3d(0, -18px, 0) scale(0.97); }
+          to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        }
+
+        @keyframes introConfettiDrift {
+          0%, 100% {
+            opacity: 0.32;
+            transform: translate3d(-10px, 14px, 0) rotate(0deg) scale(0.72);
+          }
+          45% {
+            opacity: 1;
+            transform: translate3d(18px, -22px, 0) rotate(170deg) scale(1.15);
+          }
+          75% {
+            opacity: 0.7;
+            transform: translate3d(-5px, -10px, 0) rotate(290deg) scale(0.9);
+          }
+        }
+
+        @keyframes introConfettiFieldIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes introAvatarPulse {
+          0%, 100% {
+            box-shadow:
+              0 0 0 1px rgba(255, 255, 255, 0.12),
+              0 0 18px color-mix(in srgb, var(--member-accent) 30%, transparent);
+          }
+          50% {
+            box-shadow:
+              0 0 0 1px rgba(255, 255, 255, 0.2),
+              0 0 32px color-mix(in srgb, var(--member-accent) 58%, transparent);
+          }
         }
 
         @keyframes introPortraitZoom {
@@ -940,14 +1228,16 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
         }
 
         @media (max-width: 900px) {
+          .intro-team {
+            max-width: 760px;
+          }
           .intro-team-grid {
             max-width: 680px;
-            margin: 0 auto;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 16px;
           }
-          .intro-member-card { grid-column: span 2; }
-          .intro-member-card:nth-child(4) { grid-column: 2 / span 2; }
-          .intro-member-card:nth-child(5) { grid-column: 4 / span 2; }
+          .intro-team-quote {
+            max-width: 620px;
+          }
           .intro-project {
             max-width: 760px;
             grid-template-columns: 1fr;
@@ -979,33 +1269,79 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
             width: 108px;
             margin-bottom: 20px;
           }
+          .intro-prelude h1 {
+            font-size: clamp(2.3rem, 14vw, 3.5rem);
+          }
           .intro-welcome h1 {
-            font-size: clamp(3rem, 16vw, 4.3rem);
+            font-size: clamp(3.35rem, 17vw, 4.8rem);
+          }
+          .intro-welcome h1 span {
+            white-space: nowrap;
+          }
+          .intro-welcome-card {
+            padding: 17px 18px;
+          }
+          .intro-team-quote {
+            gap: 7px;
+            margin-bottom: 12px;
+            padding: 13px 14px;
+            border-radius: 16px;
+          }
+          .intro-team-quote p {
+            font-size: 0.78rem;
+            line-height: 1.5;
+          }
+          .intro-team-quote br {
+            display: none;
+          }
+          .intro-team-quote > span {
+            font-size: 1.25rem;
+          }
+          .intro-scene-heading {
+            margin-bottom: 12px;
+          }
+          .intro-scene-heading h2 {
+            font-size: 1.6rem;
           }
           .intro-team-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
-          }
-          .intro-member-card,
-          .intro-member-card:nth-child(4),
-          .intro-member-card:nth-child(5) {
-            grid-column: auto;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px 5px;
+            max-width: 410px;
           }
           .intro-member-card:last-child {
-            width: calc(50% - 4px);
-            grid-column: 1 / -1;
+            width: 50%;
+            grid-column: 2 / span 2;
             justify-self: center;
           }
           .intro-member-card {
-            display: grid;
-            padding: 7px;
-            grid-template-columns: 64px minmax(0, 1fr);
-            align-items: center;
+            display: flex;
+            padding: 0;
           }
-          .intro-member-image { aspect-ratio: 1; }
-          .intro-member-copy { padding: 0 0 0 9px; }
-          .intro-member-copy strong { white-space: normal; }
-          .intro-member-copy small { min-height: 0; }
+          .intro-member-image {
+            width: clamp(52px, 16vw, 68px);
+          }
+          .intro-member-copy { padding-top: 6px; }
+          .intro-member-copy strong {
+            display: -webkit-box;
+            min-height: 2.5em;
+            overflow: hidden;
+            font-size: clamp(0.58rem, 2.7vw, 0.68rem);
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+          }
+          .intro-member-copy small {
+            min-height: 0;
+            font-size: 0.52rem;
+          }
+          .intro-team-confetti span:nth-child(even) {
+            display: none;
+          }
+          .intro-team-hint {
+            margin-top: 8px;
+            font-size: 0.58rem;
+          }
           .intro-feature-list {
             display: flex;
             gap: 8px;
@@ -1037,6 +1373,25 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           .intro-cloud {
             opacity: 0.08;
           }
+          .intro-scene-labels span {
+            gap: 3px;
+            font-size: 0.58rem;
+          }
+        }
+
+        @media (max-width: 359px) {
+          .intro-logo-stage {
+            width: 84px;
+          }
+          .intro-member-copy small {
+            display: none;
+          }
+          .intro-team-hint {
+            display: none;
+          }
+          .intro-welcome h1 {
+            font-size: 3rem;
+          }
         }
 
         @media (max-height: 650px) and (orientation: portrait) {
@@ -1047,7 +1402,6 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           .intro-scene-heading {
             margin-bottom: 12px;
           }
-          .intro-scene-heading > p,
           .intro-project-copy > p,
           .intro-feature-card p {
             display: none;
@@ -1064,18 +1418,30 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           .intro-feature-card {
             padding: 8px 11px;
           }
-          .intro-member-card {
-            grid-template-columns: 54px minmax(0, 1fr);
+          .intro-team-quote {
+            margin-bottom: 7px;
+            padding: 9px 11px;
+          }
+          .intro-team-quote p {
+            font-size: 0.7rem;
+          }
+          .intro-member-image {
+            width: 58px;
           }
           .intro-member-copy small {
             display: none;
           }
         }
 
-        @media (max-height: 720px) and (orientation: landscape) {
+        @media (max-height: 480px) and (orientation: landscape) {
           .intro-scene {
-            padding-top: 76px;
-            padding-bottom: 74px;
+            width: 100%;
+            height: 100dvh;
+            min-height: 0;
+            padding-top: calc(60px + env(safe-area-inset-top, 0px));
+            padding-right: max(16px, env(safe-area-inset-right, 0px));
+            padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+            padding-left: max(16px, env(safe-area-inset-left, 0px));
           }
           .intro-logo-stage {
             width: 82px;
@@ -1084,24 +1450,40 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           .intro-welcome h1 { font-size: clamp(2.6rem, 8vw, 4.4rem); }
           .intro-team {
             display: grid;
-            grid-template-columns: 0.7fr 1.3fr;
-            gap: 24px;
+            grid-template-columns: 0.72fr 1.28fr;
+            grid-template-areas:
+              "quote members"
+              "heading members";
+            gap: 8px 24px;
             align-items: center;
           }
+          .intro-team-quote {
+            grid-area: quote;
+            margin: 0;
+            padding: 12px 14px;
+          }
+          .intro-team-quote br {
+            display: none;
+          }
           .intro-scene-heading {
+            grid-area: heading;
             margin-bottom: 0;
-            text-align: left;
+            text-align: center;
           }
           .intro-team-grid {
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-area: members;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
           }
-          .intro-member-card,
-          .intro-member-card:nth-child(4),
-          .intro-member-card:nth-child(5) {
-            grid-column: auto;
+          .intro-member-card:last-child {
+            width: 50%;
+            grid-column: 2 / span 2;
           }
-          .intro-member-image { aspect-ratio: 1 / 1.08; }
+          .intro-member-image { width: clamp(54px, 8vw, 76px); }
           .intro-member-copy small { display: none; }
+          .intro-team-confetti span:nth-child(3n) {
+            display: none;
+          }
           .intro-project {
             grid-template-columns: 1fr 1fr;
             gap: 28px;
@@ -1112,6 +1494,24 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
           .intro-feature-card {
             flex-direction: row;
             padding: 10px 13px;
+          }
+        }
+
+        @media (max-height: 340px) and (orientation: landscape) {
+          .intro-member-image {
+            width: clamp(48px, 7vw, 54px);
+          }
+          .intro-scene-labels span {
+            font-size: 0;
+          }
+          .intro-scene-labels i {
+            font-size: 0.58rem;
+          }
+          .intro-team-quote {
+            padding: 8px 10px;
+          }
+          .intro-team-quote p {
+            font-size: 0.66rem;
           }
         }
 
@@ -1127,6 +1527,12 @@ export default function CinematicIntro({ onComplete, reducedMotion = false }) {
         }
 
         @media (prefers-reduced-motion: reduce) {
+          .cinematic-intro .intro-scene {
+            opacity: 1 !important;
+            transform: none !important;
+            animation: none !important;
+          }
+
           .cinematic-intro *,
           .cinematic-intro *::before,
           .cinematic-intro *::after {
