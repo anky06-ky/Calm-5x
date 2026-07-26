@@ -12,21 +12,93 @@ import { teamMembers } from '../data/membersData';
 const scenes = [
   { id: 'prelude', label: 'Mở đầu', duration: 2400 },
   { id: 'welcome', label: 'Xin chào', duration: 3800 },
-  { id: 'team', label: 'Đội ngũ', duration: 7500 },
+  { id: 'team', label: 'Đội ngũ', duration: 12000 },
   { id: 'project', label: 'Dự án', duration: 5000 },
 ];
 
 const memberAccents = ['#c084fc', '#f472b6', '#38bdf8', '#34d399', '#facc15'];
 const confettiColors = ['#c084fc', '#f472b6', '#38bdf8', '#34d399', '#facc15'];
-const teamConfetti = Array.from({ length: 34 }, (_, index) => ({
+const teamConfetti = Array.from({ length: 28 }, (_, index) => ({
   left: `${(index * 37 + 5) % 98}%`,
-  top: `${(index * 53 + 3) % 94}%`,
   size: 5 + (index % 4) * 2,
   color: confettiColors[index % confettiColors.length],
-  duration: 6.8 + (index % 5) * 0.8,
-  delay: -(index % 9) * 0.7,
+  duration: 5.6 + (index % 5) * 0.72,
+  delay: -(index % 9) * 0.64,
+  drift: `${((index * 29) % 76) - 38}px`,
   round: index % 3 === 0,
 }));
+
+const ambientClouds = [
+  {
+    top: '8%',
+    size: 'clamp(210px, 25vw, 390px)',
+    duration: 44,
+    delay: -11,
+    opacity: 0.18,
+    blur: 3,
+    rise: '-18px',
+    tone: 'violet',
+    depth: 'far',
+  },
+  {
+    top: '24%',
+    size: 'clamp(150px, 18vw, 280px)',
+    duration: 31,
+    delay: -23,
+    opacity: 0.24,
+    blur: 1,
+    rise: '14px',
+    tone: 'cyan',
+    depth: 'mid',
+    reverse: true,
+  },
+  {
+    top: '41%',
+    size: 'clamp(250px, 31vw, 470px)',
+    duration: 49,
+    delay: -36,
+    opacity: 0.14,
+    blur: 5,
+    rise: '-12px',
+    tone: 'pearl',
+    depth: 'far',
+  },
+  {
+    top: '57%',
+    size: 'clamp(170px, 21vw, 320px)',
+    duration: 35,
+    delay: -7,
+    opacity: 0.21,
+    blur: 2,
+    rise: '-22px',
+    tone: 'pink',
+    depth: 'mid',
+  },
+  {
+    top: '70%',
+    size: 'clamp(300px, 38vw, 560px)',
+    duration: 52,
+    delay: -27,
+    opacity: 0.13,
+    blur: 7,
+    rise: '10px',
+    tone: 'cyan',
+    depth: 'far',
+    reverse: true,
+  },
+  {
+    top: '81%',
+    size: 'clamp(190px, 24vw, 360px)',
+    duration: 38,
+    delay: -18,
+    opacity: 0.23,
+    blur: 2,
+    rise: '-16px',
+    tone: 'violet',
+    depth: 'near',
+    reverse: true,
+  },
+];
 
 const floatingEmotions = [
   { symbol: '😄', left: '7%', top: '28%', size: 46, duration: 9.5, delay: -1.2 },
@@ -40,11 +112,12 @@ const floatingEmotions = [
 ];
 
 const floatingFlowers = [
-  { symbol: '🌸', left: '12%', top: '46%', delay: 0.4, duration: 7.5 },
-  { symbol: '🌼', left: '83%', top: '42%', delay: 1.1, duration: 8.4 },
-  { symbol: '🌸', left: '24%', top: '73%', delay: 1.8, duration: 9.2 },
-  { symbol: '🌺', left: '73%', top: '70%', delay: 2.5, duration: 8.8 },
-  { symbol: '🌼', left: '48%', top: '9%', delay: 3.1, duration: 9.6 },
+  { left: '7%', top: '18%', delay: 0.4, duration: 12.5, size: 34, color: '#f472b6' },
+  { left: '91%', top: '19%', delay: 1.1, duration: 14.2, size: 26, color: '#c084fc' },
+  { left: '9%', top: '75%', delay: 1.8, duration: 15.6, size: 30, color: '#38bdf8' },
+  { left: '90%', top: '78%', delay: 2.5, duration: 13.8, size: 38, color: '#34d399' },
+  { left: '22%', top: '90%', delay: 3.1, duration: 16.4, size: 24, color: '#facc15' },
+  { left: '79%', top: '91%', delay: 3.7, duration: 14.8, size: 28, color: '#f472b6' },
 ];
 
 const projectFeatures = [
@@ -78,6 +151,7 @@ export default function CinematicIntro({
   const onCompleteRef = useRef(onComplete);
   const remainingTimeRef = useRef(scenes[0].duration);
   const timerStartedAtRef = useRef(0);
+  const wasPausedRef = useRef(paused);
   const scene = scenes[sceneIndex];
   const sceneDuration = scene.duration;
 
@@ -103,6 +177,13 @@ export default function CinematicIntro({
   }, [sceneDuration, sceneIndex]);
 
   useEffect(() => {
+    if (wasPausedRef.current && !paused && scene.id === 'team') {
+      remainingTimeRef.current = Math.max(remainingTimeRef.current, 4000);
+    }
+    wasPausedRef.current = paused;
+  }, [paused, scene.id]);
+
+  useEffect(() => {
     if (!isPageVisible || paused) return undefined;
 
     timerStartedAtRef.current = performance.now();
@@ -125,45 +206,85 @@ export default function CinematicIntro({
 
   return (
     <main
-      className={`cinematic-intro ${paused || !isPageVisible ? 'is-paused' : ''}`}
+      className={`cinematic-intro intro-theme-${scene.id} ${
+        paused || !isPageVisible ? 'is-paused' : ''
+      }`}
       aria-label="Mở đầu giới thiệu CalmX"
     >
       <div className="intro-grid-glow" aria-hidden="true" />
       <div className="intro-light-beam intro-light-beam-one" aria-hidden="true" />
       <div className="intro-light-beam intro-light-beam-two" aria-hidden="true" />
       <div className="intro-sky-decor" aria-hidden="true">
-        <span className="intro-cloud intro-cloud-one" />
-        <span className="intro-cloud intro-cloud-two" />
-        <span className="intro-cloud intro-cloud-three" />
-        {floatingEmotions.map((emotion, index) => (
-          <span
-            key={`${emotion.symbol}-${index}`}
-            className="intro-emotion"
-            style={{
-              '--emotion-left': emotion.left,
-              '--emotion-top': emotion.top,
-              '--emotion-size': `${emotion.size}px`,
-              '--emotion-duration': `${emotion.duration}s`,
-              '--emotion-delay': `${emotion.delay}s`,
-            }}
-          >
-            {emotion.symbol}
-          </span>
-        ))}
-        {floatingFlowers.map((flower, index) => (
-          <span
-            key={`${flower.symbol}-${index}`}
-            className="intro-flower"
-            style={{
-              '--flower-left': flower.left,
-              '--flower-top': flower.top,
-              '--flower-delay': `${flower.delay}s`,
-              '--flower-duration': `${flower.duration}s`,
-            }}
-          >
-            {flower.symbol}
-          </span>
-        ))}
+        <span className="intro-aurora-field" />
+        <span className="intro-dust-field intro-dust-field-far" />
+        <span className="intro-dust-field intro-dust-field-near" />
+
+        <div className="intro-cloud-field">
+          {ambientClouds.map((cloud, index) => (
+            <span
+              key={`${cloud.top}-${index}`}
+              className={`intro-cloud-lane intro-cloud-${cloud.depth} ${
+                cloud.reverse ? 'is-reverse' : ''
+              }`}
+              style={{
+                '--cloud-top': cloud.top,
+                '--cloud-size': cloud.size,
+                '--cloud-duration': `${cloud.duration}s`,
+                '--cloud-delay': `${cloud.delay}s`,
+                '--cloud-opacity': cloud.opacity,
+                '--cloud-blur': `${cloud.blur}px`,
+                '--cloud-rise': cloud.rise,
+              }}
+            >
+              <i className={`intro-cloud intro-cloud-${cloud.tone}`} />
+            </span>
+          ))}
+        </div>
+
+        <span className="intro-cloud-bank intro-cloud-bank-back" />
+        <span className="intro-cloud-bank intro-cloud-bank-front" />
+
+        <div className="intro-emotion-field">
+          {floatingEmotions.map((emotion, index) => (
+            <span
+              key={`${emotion.symbol}-${index}`}
+              className="intro-emotion"
+              style={{
+                '--emotion-left': emotion.left,
+                '--emotion-top': emotion.top,
+                '--emotion-size': `${emotion.size}px`,
+                '--emotion-duration': `${emotion.duration}s`,
+                '--emotion-delay': `${emotion.delay}s`,
+              }}
+            >
+              {emotion.symbol}
+            </span>
+          ))}
+        </div>
+
+        <div className="intro-flower-field">
+          {floatingFlowers.map((flower, index) => (
+            <span
+              key={`${flower.left}-${flower.top}`}
+              className="intro-flower"
+              style={{
+                '--flower-left': flower.left,
+                '--flower-top': flower.top,
+                '--flower-delay': `${flower.delay}s`,
+                '--flower-duration': `${flower.duration}s`,
+                '--flower-size': `${flower.size}px`,
+                '--flower-color': flower.color,
+              }}
+            >
+              {Array.from({ length: 6 }, (_, petalIndex) => (
+                <i key={petalIndex} style={{ '--petal-index': petalIndex }} />
+              ))}
+              <b />
+            </span>
+          ))}
+        </div>
+
+        <span className="intro-atmosphere-clarity" />
       </div>
 
       <header className="intro-topbar">
@@ -224,11 +345,11 @@ export default function CinematicIntro({
                   key={index}
                   style={{
                     '--confetti-left': particle.left,
-                    '--confetti-top': particle.top,
                     '--confetti-size': `${particle.size}px`,
                     '--confetti-color': particle.color,
                     '--confetti-duration': `${particle.duration}s`,
                     '--confetti-delay': `${particle.delay}s`,
+                    '--confetti-drift': particle.drift,
                     '--confetti-radius': particle.round ? '50%' : '2px',
                   }}
                 />
@@ -352,8 +473,10 @@ export default function CinematicIntro({
           overflow: hidden;
           color: #fff;
           background:
-            radial-gradient(circle at 50% 45%, rgba(88, 28, 135, 0.22), transparent 38%),
-            linear-gradient(145deg, rgba(7, 5, 16, 0.78), rgba(5, 4, 14, 0.96));
+            radial-gradient(circle at 50% 43%, rgba(88, 28, 135, 0.24), transparent 38%),
+            radial-gradient(circle at 10% 18%, rgba(14, 116, 144, 0.11), transparent 28%),
+            radial-gradient(circle at 88% 82%, rgba(190, 24, 93, 0.08), transparent 26%),
+            linear-gradient(145deg, rgba(6, 7, 20, 0.88), rgba(3, 6, 16, 0.98));
           isolation: isolate;
         }
 
@@ -361,10 +484,10 @@ export default function CinematicIntro({
           position: absolute;
           inset: 0;
           z-index: -2;
-          opacity: 0.22;
+          opacity: 0.07;
           background-image:
-            linear-gradient(rgba(192, 132, 252, 0.12) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px);
+            linear-gradient(rgba(192, 132, 252, 0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(56, 189, 248, 0.07) 1px, transparent 1px);
           background-size: 64px 64px;
           mask-image: radial-gradient(circle at center, #000, transparent 74%);
           animation: introGridDrift 12s linear infinite;
@@ -375,8 +498,8 @@ export default function CinematicIntro({
           z-index: -1;
           width: 38vw;
           height: 140vh;
-          opacity: 0.18;
-          filter: blur(26px);
+          opacity: 0.13;
+          filter: blur(46px);
           background: linear-gradient(180deg, transparent, #a855f7 45%, transparent);
           transform: rotate(24deg);
           animation: introBeamSweep 8s ease-in-out infinite alternate;
@@ -396,63 +519,228 @@ export default function CinematicIntro({
           z-index: -1;
           overflow: hidden;
           pointer-events: none;
+          --clarity-width: 48%;
+          --clarity-height: 54%;
+          --emotion-opacity: 0.28;
+          --flower-opacity: 0.48;
+          --cloud-field-opacity: 0.82;
+          --bank-opacity: 0.18;
+        }
+
+        .intro-theme-prelude .intro-sky-decor {
+          --clarity-width: 38%;
+          --clarity-height: 46%;
+          --emotion-opacity: 0.08;
+          --flower-opacity: 0.16;
+          --cloud-field-opacity: 0.68;
+          --bank-opacity: 0.14;
+        }
+
+        .intro-theme-welcome .intro-sky-decor {
+          --clarity-width: 62%;
+          --clarity-height: 62%;
+          --emotion-opacity: 0.18;
+          --flower-opacity: 0.56;
+          --cloud-field-opacity: 0.88;
+          --bank-opacity: 0.2;
+        }
+
+        .intro-theme-team .intro-sky-decor {
+          --clarity-width: 84%;
+          --clarity-height: 78%;
+          --emotion-opacity: 0.72;
+          --flower-opacity: 0.86;
+          --cloud-field-opacity: 0.76;
+          --bank-opacity: 0.22;
+        }
+
+        .intro-theme-project .intro-sky-decor {
+          --clarity-width: 86%;
+          --clarity-height: 74%;
+          --emotion-opacity: 0.38;
+          --flower-opacity: 0.5;
+          --cloud-field-opacity: 0.82;
+          --bank-opacity: 0.2;
+        }
+
+        .intro-aurora-field {
+          position: absolute;
+          inset: -28%;
+          z-index: 0;
+          opacity: 0.46;
+          background:
+            radial-gradient(ellipse at 24% 36%, rgba(168, 85, 247, 0.22), transparent 31%),
+            radial-gradient(ellipse at 76% 32%, rgba(34, 211, 238, 0.16), transparent 32%),
+            radial-gradient(ellipse at 58% 78%, rgba(52, 211, 153, 0.1), transparent 30%);
+          filter: blur(54px);
+          transform-origin: center;
+          animation: introAuroraBreathe 24s ease-in-out infinite alternate;
+        }
+
+        .intro-dust-field {
+          position: absolute;
+          inset: -12%;
+          z-index: 1;
+          opacity: 0.52;
+          background-image:
+            radial-gradient(circle, rgba(244, 114, 182, 0.85) 0 1px, transparent 1.7px),
+            radial-gradient(circle, rgba(56, 189, 248, 0.72) 0 1.2px, transparent 1.9px),
+            radial-gradient(circle, rgba(52, 211, 153, 0.56) 0 0.8px, transparent 1.5px);
+          background-position: 12px 24px, 62px 88px, 19px 57px;
+          background-size: 127px 151px, 181px 203px, 97px 113px;
+          mask-image: radial-gradient(ellipse at 50% 48%, transparent 0 27%, #000 69%);
+          -webkit-mask-image: radial-gradient(ellipse at 50% 48%, transparent 0 27%, #000 69%);
+          animation: introDustDrift 30s linear infinite;
+        }
+
+        .intro-dust-field-near {
+          z-index: 3;
+          opacity: 0.3;
+          background-image:
+            radial-gradient(circle, rgba(250, 204, 21, 0.82) 0 1.7px, transparent 2.5px),
+            radial-gradient(circle, rgba(192, 132, 252, 0.82) 0 1.4px, transparent 2.2px);
+          background-position: 42px 18px, 18px 76px;
+          background-size: 233px 271px, 197px 223px;
+          animation-duration: 20s;
+          animation-direction: reverse;
+        }
+
+        .intro-cloud-field {
+          position: absolute;
+          inset: 0;
+          z-index: 2;
+          opacity: var(--cloud-field-opacity);
+          transition: opacity 800ms ease;
+        }
+
+        .intro-cloud-lane {
+          position: absolute;
+          top: var(--cloud-top);
+          left: -42vw;
+          width: var(--cloud-size);
+          opacity: var(--cloud-opacity);
+          animation: introCloudTravel var(--cloud-duration) var(--cloud-delay) linear infinite;
+          will-change: transform;
+        }
+
+        .intro-cloud-lane.is-reverse {
+          animation-direction: reverse;
         }
 
         .intro-cloud {
-          position: absolute;
-          width: 180px;
-          height: 54px;
-          opacity: 0.13;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          --cloud-a: rgba(224, 231, 255, 0.66);
+          --cloud-b: rgba(168, 85, 247, 0.16);
+          position: relative;
+          display: block;
+          width: 100%;
+          aspect-ratio: 3.2 / 1;
           border-radius: 999px;
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(216, 180, 254, 0.14));
-          box-shadow: 0 0 42px rgba(192, 132, 252, 0.18);
-          filter: blur(0.2px);
-          animation: introCloudDrift 18s ease-in-out infinite alternate;
+          background: linear-gradient(180deg, var(--cloud-a), var(--cloud-b));
+          box-shadow:
+            inset 0 9px 22px rgba(255, 255, 255, 0.13),
+            0 18px 54px rgba(7, 5, 20, 0.28);
+          filter: blur(var(--cloud-blur));
+          animation: introCloudBreathe 8s ease-in-out infinite alternate;
         }
 
         .intro-cloud::before,
         .intro-cloud::after {
           content: '';
           position: absolute;
-          bottom: 13px;
-          border-radius: 50%;
-          background: inherit;
-          border-top: 1px solid rgba(255, 255, 255, 0.18);
+          bottom: 16%;
+          border-radius: 52% 52% 46% 46%;
+          background: linear-gradient(155deg, var(--cloud-a), var(--cloud-b));
         }
 
         .intro-cloud::before {
-          left: 28px;
-          width: 72px;
-          height: 72px;
+          left: 13%;
+          width: 44%;
+          aspect-ratio: 1.15;
         }
 
         .intro-cloud::after {
-          right: 24px;
-          width: 92px;
-          height: 92px;
+          right: 12%;
+          width: 53%;
+          aspect-ratio: 1.28;
         }
 
-        .intro-cloud-one {
-          top: 18%;
-          left: -42px;
+        .intro-cloud-cyan {
+          --cloud-a: rgba(207, 250, 254, 0.58);
+          --cloud-b: rgba(14, 116, 144, 0.13);
         }
 
-        .intro-cloud-two {
-          top: 53%;
-          right: -58px;
-          width: 220px;
-          animation-duration: 22s;
-          animation-delay: -7s;
+        .intro-cloud-pink {
+          --cloud-a: rgba(253, 242, 248, 0.58);
+          --cloud-b: rgba(219, 39, 119, 0.12);
         }
 
-        .intro-cloud-three {
-          right: 28%;
-          bottom: 9%;
-          width: 145px;
-          transform: scale(0.7);
-          animation-duration: 20s;
-          animation-delay: -12s;
+        .intro-cloud-pearl {
+          --cloud-a: rgba(248, 250, 252, 0.5);
+          --cloud-b: rgba(148, 163, 184, 0.11);
+        }
+
+        .intro-cloud-bank {
+          position: absolute;
+          right: -12%;
+          bottom: -104px;
+          left: -12%;
+          z-index: 4;
+          height: 238px;
+          opacity: var(--bank-opacity);
+          background:
+            radial-gradient(ellipse at 7% 92%, rgba(224, 231, 255, 0.7) 0 10%, transparent 23%),
+            radial-gradient(ellipse at 21% 84%, rgba(216, 180, 254, 0.62) 0 13%, transparent 27%),
+            radial-gradient(ellipse at 39% 98%, rgba(207, 250, 254, 0.65) 0 15%, transparent 30%),
+            radial-gradient(ellipse at 59% 86%, rgba(224, 231, 255, 0.64) 0 14%, transparent 29%),
+            radial-gradient(ellipse at 78% 96%, rgba(216, 180, 254, 0.58) 0 14%, transparent 29%),
+            radial-gradient(ellipse at 96% 86%, rgba(207, 250, 254, 0.62) 0 12%, transparent 26%);
+          filter: blur(12px);
+          transform-origin: center bottom;
+          animation: introCloudBankSway 19s ease-in-out infinite alternate;
+          transition: opacity 800ms ease;
+        }
+
+        .intro-cloud-bank-front {
+          right: -18%;
+          bottom: -142px;
+          left: -18%;
+          height: 292px;
+          opacity: var(--bank-opacity);
+          filter: blur(20px) opacity(72%);
+          transform: scaleX(1.08);
+          animation-duration: 25s;
+          animation-direction: alternate-reverse;
+        }
+
+        .intro-emotion-field,
+        .intro-flower-field {
+          position: absolute;
+          inset: 0;
+          z-index: 5;
+          opacity: var(--emotion-opacity);
+          transition: opacity 800ms ease;
+        }
+
+        .intro-flower-field {
+          z-index: 6;
+          opacity: var(--flower-opacity);
+        }
+
+        .intro-theme-prelude .intro-emotion-field,
+        .intro-theme-prelude .intro-flower-field,
+        .intro-theme-prelude .intro-dust-field,
+        .intro-theme-welcome .intro-emotion-field,
+        .intro-theme-welcome .intro-dust-field,
+        .intro-theme-team .intro-dust-field,
+        .intro-theme-project .intro-emotion-field,
+        .intro-theme-project .intro-flower-field,
+        .intro-theme-project .intro-dust-field {
+          display: none;
+        }
+
+        .intro-theme-welcome .intro-aurora-field,
+        .intro-theme-team .intro-aurora-field {
+          animation: none;
         }
 
         .intro-emotion {
@@ -472,6 +760,7 @@ export default function CinematicIntro({
             inset 0 1px 0 rgba(255, 255, 255, 0.2),
             0 0 20px rgba(168, 85, 247, 0.13);
           backdrop-filter: blur(9px);
+          filter: saturate(0.86);
           animation: introEmotionFloat var(--emotion-duration) var(--emotion-delay) ease-in-out infinite;
         }
 
@@ -479,13 +768,59 @@ export default function CinematicIntro({
           position: absolute;
           top: var(--flower-top);
           left: var(--flower-left);
-          font-size: clamp(20px, 2.4vw, 34px);
+          width: var(--flower-size);
+          height: var(--flower-size);
           opacity: 0;
-          filter: drop-shadow(0 0 10px rgba(244, 114, 182, 0.42));
-          transform-origin: center bottom;
+          filter: drop-shadow(0 0 9px color-mix(in srgb, var(--flower-color) 48%, transparent));
+          transform-origin: center;
           animation:
-            introFlowerBloom 1.6s var(--flower-delay) cubic-bezier(0.16, 1, 0.3, 1) forwards,
-            introFlowerSway var(--flower-duration) calc(var(--flower-delay) + 1.6s) ease-in-out infinite;
+            introFlowerBloom 1.2s var(--flower-delay) cubic-bezier(0.16, 1, 0.3, 1) forwards,
+            introFlowerSway var(--flower-duration) calc(var(--flower-delay) + 1.2s) ease-in-out infinite;
+        }
+
+        .intro-flower i {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 38%;
+          height: 56%;
+          border: 1px solid color-mix(in srgb, var(--flower-color) 72%, white);
+          border-radius: 70% 70% 58% 58%;
+          background: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--flower-color) 58%, white),
+            color-mix(in srgb, var(--flower-color) 48%, transparent)
+          );
+          transform:
+            translate(-50%, -100%)
+            rotate(calc(var(--petal-index) * 60deg))
+            translateY(-8%);
+          transform-origin: 50% 100%;
+        }
+
+        .intro-flower b {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 26%;
+          aspect-ratio: 1;
+          border-radius: 50%;
+          background: #fef08a;
+          box-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+          transform: translate(-50%, -50%);
+        }
+
+        .intro-atmosphere-clarity {
+          position: absolute;
+          inset: 0;
+          z-index: 7;
+          background: radial-gradient(
+            ellipse var(--clarity-width) var(--clarity-height) at 50% 47%,
+            rgba(5, 7, 18, 0.7),
+            rgba(5, 7, 18, 0.42) 56%,
+            transparent 84%
+          );
+          transition: background 800ms ease;
         }
 
         .intro-topbar {
@@ -599,8 +934,32 @@ export default function CinematicIntro({
 
         .intro-prelude,
         .intro-welcome {
+          position: relative;
           max-width: 850px;
           text-align: center;
+          isolation: isolate;
+        }
+
+        .intro-prelude::before,
+        .intro-welcome::before {
+          content: '';
+          position: absolute;
+          z-index: -1;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(168, 85, 247, 0.2), transparent 68%);
+          pointer-events: none;
+          animation: introContentHalo 10s ease-in-out infinite alternate;
+        }
+
+        .intro-prelude::before {
+          inset: -18% 8%;
+        }
+
+        .intro-welcome::before {
+          inset: -9% -5%;
+          background:
+            radial-gradient(circle at 38% 42%, rgba(244, 114, 182, 0.15), transparent 38%),
+            radial-gradient(circle at 63% 57%, rgba(34, 211, 238, 0.13), transparent 40%);
         }
 
         .intro-prelude h1 {
@@ -781,11 +1140,27 @@ export default function CinematicIntro({
           width: 100%;
           max-width: 980px;
           text-align: center;
+          isolation: isolate;
+        }
+
+        .intro-team::before {
+          content: '';
+          position: absolute;
+          inset: 10% 3% 1%;
+          z-index: 0;
+          opacity: 0.34;
+          border-radius: 50%;
+          background:
+            radial-gradient(ellipse at center, transparent 0 56%, rgba(192, 132, 252, 0.2) 57%, transparent 59%),
+            radial-gradient(ellipse at center, rgba(56, 189, 248, 0.07), transparent 67%);
+          filter: blur(0.2px);
+          animation: introTeamHalo 13s ease-in-out infinite alternate;
+          pointer-events: none;
         }
 
         .intro-team-confetti {
           position: absolute;
-          inset: -18vh -10vw;
+          inset: -5vh -4vw;
           z-index: 0;
           overflow: hidden;
           pointer-events: none;
@@ -795,7 +1170,7 @@ export default function CinematicIntro({
 
         .intro-team-confetti span {
           position: absolute;
-          top: var(--confetti-top);
+          top: -10vh;
           left: var(--confetti-left);
           width: var(--confetti-size);
           height: var(--confetti-size);
@@ -803,8 +1178,8 @@ export default function CinematicIntro({
           border-radius: var(--confetti-radius);
           background: var(--confetti-color);
           box-shadow: 0 0 13px color-mix(in srgb, var(--confetti-color) 65%, transparent);
-          animation: introConfettiDrift var(--confetti-duration) var(--confetti-delay)
-            ease-in-out infinite;
+          animation: introConfettiFall var(--confetti-duration) var(--confetti-delay)
+            linear infinite;
         }
 
         .intro-team-quote,
@@ -917,8 +1292,8 @@ export default function CinematicIntro({
           box-shadow:
             0 0 0 1px rgba(255, 255, 255, 0.12),
             0 0 24px color-mix(in srgb, var(--member-accent) 42%, transparent);
-          animation: introAvatarPulse 3.4s calc(var(--intro-member-index) * -0.6s)
-            ease-in-out infinite;
+          animation: introAvatarPulse 2.8s calc(1s + var(--intro-member-index) * 0.14s)
+            ease-in-out 1 both;
         }
 
         .intro-member-image img {
@@ -962,14 +1337,31 @@ export default function CinematicIntro({
           font-size: 0.68rem;
           font-weight: 700;
           letter-spacing: 0.05em;
+          animation: introHintPulse 1.7s 1.6s ease-in-out 2 backwards;
         }
 
         .intro-project {
+          position: relative;
           display: grid;
           width: 100%;
           grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
           gap: clamp(34px, 6vw, 84px);
           align-items: center;
+          isolation: isolate;
+        }
+
+        .intro-project::before {
+          content: '';
+          position: absolute;
+          inset: -14% -5%;
+          z-index: -1;
+          opacity: 0.55;
+          border-radius: 42%;
+          background:
+            radial-gradient(circle at 24% 48%, rgba(244, 114, 182, 0.12), transparent 34%),
+            radial-gradient(circle at 76% 52%, rgba(56, 189, 248, 0.13), transparent 36%);
+          animation: introContentHalo 12s ease-in-out infinite alternate-reverse;
+          pointer-events: none;
         }
 
         .intro-project h2 span {
@@ -1084,9 +1476,10 @@ export default function CinematicIntro({
           font-style: normal;
         }
 
-        .cinematic-intro.is-paused .intro-scene,
-        .cinematic-intro.is-paused .intro-progress-fill {
-          animation-play-state: paused;
+        .cinematic-intro.is-paused *,
+        .cinematic-intro.is-paused *::before,
+        .cinematic-intro.is-paused *::after {
+          animation-play-state: paused !important;
         }
 
         @keyframes introSceneLifecycle {
@@ -1132,9 +1525,44 @@ export default function CinematicIntro({
           to { transform: translate3d(9vw, 0, 0) rotate(18deg); }
         }
 
-        @keyframes introCloudDrift {
-          from { transform: translate3d(-18px, 5px, 0) scale(0.92); }
-          to { transform: translate3d(56px, -12px, 0) scale(1.06); }
+        @keyframes introAuroraBreathe {
+          from { transform: translate3d(-3vw, -1vh, 0) rotate(-2deg) scale(0.98); }
+          to { transform: translate3d(4vw, 2vh, 0) rotate(3deg) scale(1.06); }
+        }
+
+        @keyframes introDustDrift {
+          from { transform: translate3d(-2vw, 1vh, 0) rotate(0.01deg); }
+          to { transform: translate3d(3vw, -3vh, 0) rotate(1.2deg); }
+        }
+
+        @keyframes introCloudTravel {
+          from { transform: translate3d(-10vw, 0, 0); }
+          to { transform: translate3d(152vw, var(--cloud-rise), 0); }
+        }
+
+        @keyframes introCloudBreathe {
+          from { transform: translate3d(0, 2px, 0) scale(0.97); }
+          to { transform: translate3d(0, -4px, 0) scale(1.025); }
+        }
+
+        @keyframes introCloudBankSway {
+          from { transform: translate3d(-2.5vw, 4px, 0) scaleX(1.02); }
+          to { transform: translate3d(2.5vw, -7px, 0) scaleX(1.08); }
+        }
+
+        @keyframes introContentHalo {
+          from { opacity: 0.52; transform: translate3d(-1.5%, 1%, 0) scale(0.96); }
+          to { opacity: 0.84; transform: translate3d(1.5%, -1%, 0) scale(1.06); }
+        }
+
+        @keyframes introTeamHalo {
+          from { transform: translate3d(-1.5%, 0, 0) scale(0.96) rotate(-1deg); }
+          to { transform: translate3d(1.5%, -1%, 0) scale(1.04) rotate(1deg); }
+        }
+
+        @keyframes introHintPulse {
+          0%, 100% { opacity: 0.46; transform: translate3d(0, 0, 0); }
+          50% { opacity: 1; transform: translate3d(0, -2px, 0); }
         }
 
         @keyframes introEmotionFloat {
@@ -1179,18 +1607,16 @@ export default function CinematicIntro({
           to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
         }
 
-        @keyframes introConfettiDrift {
-          0%, 100% {
-            opacity: 0.32;
-            transform: translate3d(-10px, 14px, 0) rotate(0deg) scale(0.72);
+        @keyframes introConfettiFall {
+          0% {
+            opacity: 0;
+            transform: translate3d(0, -8vh, 0) rotate(0deg) scale(0.72);
           }
-          45% {
-            opacity: 1;
-            transform: translate3d(18px, -22px, 0) rotate(170deg) scale(1.15);
-          }
-          75% {
-            opacity: 0.7;
-            transform: translate3d(-5px, -10px, 0) rotate(290deg) scale(0.9);
+          14% { opacity: 0.92; }
+          78% { opacity: 0.78; }
+          100% {
+            opacity: 0;
+            transform: translate3d(var(--confetti-drift), 122vh, 0) rotate(540deg) scale(1.06);
           }
         }
 
@@ -1338,6 +1764,15 @@ export default function CinematicIntro({
           .intro-team-confetti span:nth-child(even) {
             display: none;
           }
+          .intro-team-confetti span:nth-child(5n) {
+            display: none;
+          }
+          .intro-team-confetti {
+            inset: 0;
+          }
+          .intro-team-confetti span {
+            box-shadow: none;
+          }
           .intro-team-hint {
             margin-top: 8px;
             font-size: 0.58rem;
@@ -1362,20 +1797,58 @@ export default function CinematicIntro({
             -webkit-line-clamp: 1;
           }
           .intro-enter { width: 100%; justify-content: center; }
-          .intro-emotion:nth-of-type(even),
-          .intro-flower:nth-of-type(even) {
+          .intro-light-beam {
             display: none;
           }
-          .intro-emotion {
-            opacity: 0.72;
-            transform: scale(0.82);
+          .intro-dust-field-near,
+          .intro-cloud-bank-front,
+          .intro-cloud-lane:nth-child(n + 3),
+          .intro-emotion:nth-child(n + 3),
+          .intro-flower:nth-child(n + 3) {
+            display: none;
           }
-          .intro-cloud {
-            opacity: 0.08;
+          .intro-grid-glow {
+            animation: none;
+          }
+          .intro-emotion {
+            transform: scale(0.82);
+            backdrop-filter: none;
+          }
+          .intro-cloud,
+          .intro-member-image,
+          .intro-prelude::before,
+          .intro-welcome::before,
+          .intro-team::before,
+          .intro-project::before {
+            animation: none;
+          }
+          .intro-cloud-bank {
+            filter: blur(15px);
+          }
+          .intro-welcome-card,
+          .intro-team-quote,
+          .intro-feature-card {
+            backdrop-filter: none;
           }
           .intro-scene-labels span {
-            gap: 3px;
+            gap: 5px;
+            font-size: 0;
+          }
+          .intro-scene-labels span.active {
             font-size: 0.58rem;
+          }
+          .intro-scene-labels i {
+            width: 7px;
+            height: 7px;
+            overflow: hidden;
+            font-size: 0;
+            border-radius: 50%;
+            background: currentColor;
+          }
+          .intro-scene-labels span.active i {
+            width: 9px;
+            height: 9px;
+            box-shadow: 0 0 10px currentColor;
           }
         }
 
@@ -1391,6 +1864,83 @@ export default function CinematicIntro({
           }
           .intro-welcome h1 {
             font-size: 3rem;
+          }
+        }
+
+        @media (max-height: 700px) and (min-width: 901px) {
+          .intro-scene {
+            padding-top: calc(64px + env(safe-area-inset-top, 0px));
+            padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+          }
+          .intro-logo-stage {
+            width: 94px;
+            margin-bottom: 10px;
+          }
+          .intro-prelude h1 {
+            margin-top: 8px;
+            font-size: 2.8rem;
+          }
+          .intro-welcome h1 {
+            margin: 8px 0 12px;
+            font-size: clamp(3.4rem, 8vw, 5.6rem);
+          }
+          .intro-welcome-card {
+            padding: 14px 22px;
+          }
+          .intro-team-quote {
+            max-width: 760px;
+            gap: 10px;
+            margin-bottom: 8px;
+            padding: 10px 18px;
+          }
+          .intro-team-quote br {
+            display: none;
+          }
+          .intro-team-quote p {
+            font-size: 0.8rem;
+            line-height: 1.45;
+          }
+          .intro-scene-heading {
+            margin-bottom: 8px;
+          }
+          .intro-scene-heading h2 {
+            font-size: 1.8rem;
+          }
+          .intro-team-grid {
+            max-width: 900px;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 14px;
+          }
+          .intro-member-card:last-child {
+            width: auto;
+            grid-column: auto;
+          }
+          .intro-member-image {
+            width: 76px;
+          }
+          .intro-member-copy {
+            padding-top: 6px;
+          }
+          .intro-member-copy small {
+            display: none;
+          }
+          .intro-team-hint {
+            margin-top: 7px;
+          }
+          .intro-project {
+            gap: 26px;
+          }
+          .intro-project-copy > p {
+            margin: 10px 0 14px;
+          }
+          .intro-feature-list {
+            gap: 8px;
+          }
+          .intro-feature-card {
+            padding: 10px 13px;
+          }
+          .intro-feature-card p {
+            display: none;
           }
         }
 
@@ -1481,7 +2031,8 @@ export default function CinematicIntro({
           }
           .intro-member-image { width: clamp(54px, 8vw, 76px); }
           .intro-member-copy small { display: none; }
-          .intro-team-confetti span:nth-child(3n) {
+          .intro-team-confetti span:nth-child(even),
+          .intro-team-confetti span:nth-child(5n) {
             display: none;
           }
           .intro-project {
@@ -1494,6 +2045,13 @@ export default function CinematicIntro({
           .intro-feature-card {
             flex-direction: row;
             padding: 10px 13px;
+          }
+          .intro-cloud-lane:nth-child(n + 3),
+          .intro-emotion:nth-child(n + 3),
+          .intro-flower:nth-child(n + 3),
+          .intro-cloud-bank-front,
+          .intro-dust-field-near {
+            display: none;
           }
         }
 
@@ -1515,15 +2073,36 @@ export default function CinematicIntro({
           }
         }
 
-        .performance-mode .intro-grid-glow,
-        .performance-mode .intro-light-beam {
+        .performance-mode .intro-grid-glow {
           animation: none !important;
         }
 
-        .performance-mode .intro-cloud-three,
-        .performance-mode .intro-emotion:nth-of-type(even),
-        .performance-mode .intro-flower:nth-of-type(even) {
+        .performance-mode .intro-light-beam,
+        .performance-mode .intro-aurora-field,
+        .performance-mode .intro-dust-field-near,
+        .performance-mode .intro-cloud-lane:nth-child(n + 3),
+        .performance-mode .intro-emotion:nth-child(n + 3),
+        .performance-mode .intro-flower,
+        .performance-mode .intro-cloud-bank-front,
+        .performance-mode .intro-team-confetti span:nth-child(n + 9) {
           display: none;
+        }
+
+        .performance-mode .intro-cloud,
+        .performance-mode .intro-member-image,
+        .performance-mode .intro-cloud-bank,
+        .performance-mode .intro-prelude::before,
+        .performance-mode .intro-welcome::before,
+        .performance-mode .intro-team::before,
+        .performance-mode .intro-project::before {
+          animation: none !important;
+        }
+
+        .performance-mode .intro-emotion,
+        .performance-mode .intro-welcome-card,
+        .performance-mode .intro-team-quote,
+        .performance-mode .intro-feature-card {
+          backdrop-filter: none;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -1536,8 +2115,17 @@ export default function CinematicIntro({
           .cinematic-intro *,
           .cinematic-intro *::before,
           .cinematic-intro *::after {
-            animation-duration: 0.01ms !important;
-            animation-delay: 0ms !important;
+            animation: none !important;
+            transition-duration: 0.01ms !important;
+          }
+
+          .cinematic-intro .intro-cloud-field,
+          .cinematic-intro .intro-emotion-field,
+          .cinematic-intro .intro-flower-field,
+          .cinematic-intro .intro-dust-field-near,
+          .cinematic-intro .intro-light-beam,
+          .cinematic-intro .intro-team-confetti {
+            display: none;
           }
         }
       `}</style>
